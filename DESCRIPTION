@@ -1,0 +1,13 @@
+Package: covidscreen
+Title: Simulate Asymptomatic Screening for COVID-19
+Version: 0.0.0.9000
+Authors@R: person('Jesse', 'Smith', email = 'Jesse.Smith@stjude.com', role = c('cre', 'aut'))
+Description: The {covidscreen} package provides simple simulations for understanding the effects of assurance testing/screening on a population. It aims to help decision-makers determine whether and how to test for COVID-19 with limited resources.
+License: MIT + file LICENSE
+Imports: 
+    config (>= 0.3.1),
+    golem (>= 0.3.1),
+    shiny (>= 1.6.0)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
