@@ -1,0 +1,223 @@
+---
+title: "Model Description"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Description}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(covidscreen)
+```
+
+# Overview
+
+The probability model behind **{covidscreen}** is extremely simple - intentionally so. At its essence, it simply splits a population into categories based on a few discrete variables. Reality is significantly more complex, and this model will not provide predictions about the future. Instead, it provides a tool to help decision-makers construct informed judgments about their COVID-19 testing programs, without wading through epidemiological and statistical details.
+
+## Variables and Parameters
+
+While **{covidscreen}** allows full manipulation of its probability model, it makes a distinction between variables of interest and auxiliary parameters. The **variables** of interest are easily manipulated in the UI; they are either **interventions** that a decision-maker can change, or **context** that varies by location. The auxiliary **parameters** are less visible in the UI; they largely do *not* vary by location and are roughly stationary **properties of COVID-19, its vaccinations, and its tests**.
+
+### Variables
+
+Variables can be broken down into **interventions** or **context**. Our model is interested in two interventions (testing and vaccination within an organization) and several contextual variables (incidence and vaccination in the surrounding community). We will take each of these in turn.
+
+#### Interventions
+
+This model is concerned with two possible interventions in our organization - **testing** (and isolation if positive) and **vaccination**.
+
+Testing can be controlled via ***asymptomatic testing frequency***; that is, how often individuals without COVID-19 symptoms are tested. The more frequently people are tested, the less time asymptomatic individuals spent in contact with others.
+
+Vaccinations are controlled via the ***proportion of organization vaccinated***; that is, the percentage of the people in the organization who are fully vaccinated. The higher this number is, the less likely infections are.
+
+#### Context
+
+The model considers infection and vaccination in the community in its determination of infection probability within the organization. ***Incidence***, or the number of new cases per day per 100,000 people in the community, is the baseline. This can be adjusted for vaccination status using the ***proportion of community vaccinated*** (along with vaccine efficacy, discussed below). The incidence in each vaccination group *outside* of the organization gives the probability that a person in that group will bring COVID-19 *into* the organization.
+
+### Parameters
+
+The model accounts for a variety of additional inputs. While these inputs are sometimes *uncertain*, they are all assumed to be *context-independent*. These inputs include the properties of the **COVID-19 illness**, the properties of **COVID-19 vaccinations**, and the properties of **COVID-19 tests**. We again consider each in turn.
+
+#### Illness
+
+The model considers 3 characteristics of COVID-19 in its calculations. The first is the ***proportion of symptomatic cases***, or the proportion of infected people who will *at some point* display symptoms. This parameters is used to calculate the probability that an individual will be tested; since symptomatic individuals are more likely to submit to a test, a higher proportion ultimately means fewer undetected cases.
+
+The second parameter is the ***infectious period***, or the length of time that someone who contracts COVID-19 will be able to infect others. The higher this parameter, more time an undetected infection has to spread.
+
+The third parameter is the ***pre-symptomatic period***, or the length of time that an *eventually* symptomatic case will be infectious without displaying symptoms. A hallmark of COVID-19 is that a significant proportion of transmission occurs *before* symptom onset; thus, the longer individuals go without symptoms, the more time the virus has to spread to others undetected.
+
+#### Vaccination
+
+The primary vaccination parameter of interest is ***vaccine efficacy***, the relative decrease in infection risk when moving from unvaccinated to vaccinated. Note that this number, alone, cannot give us the likelihood of infection or the proportion of infections that will be vaccinated. Those things depend on the incidence and vaccinated proportion in the population (discussed above). Instead, efficacy tells us what proportion (or percentage) of the risk experienced by an unvaccinated person can be mitigated by being vaccinated. The higher this number, the less likely a vaccinated individual is to contract COVID-19. If it reaches 1 (or 100%), then *no* vaccinated people will fall ill. On the other hand, if it were 0 (%), a vaccine would offer no protection at all.
+
+#### Testing
+
+The properties of COVID-19 tests determine how precisely they can determine whether someone does or does not have COVID-19. This model incorporates two measures of precision. ***Sensitivity*** is the proportion of true infections that a test would correctly label as "positive". On the other hand, ***specificity*** is the proportion of uninfected individuals that a test would correctly label as "negative." Given these two numbers, along with the probabilities of being infected and tested, we can determine how likely it is that someone who tests positive is *actually* positive, or that someone who tests negative is *actually* negative, among other things.
+
+A final testing parameter actually deals more with human behavior, but is difficult to estimate effectively. The ***proportion of symptomatic infections tested*** tells us the likelihood that a symptomatic case will actually go get test based on their symptoms. While this is really a parameter of the population, we file it under testing for convenience.
+
+## Probability Model
+
+We have thus far discussed the raw inputs used by **{covidscreen}**. These inputs are mapped to a joint probability distribution, but not in a 1-to-1 manner. Instead, they are used to calculate probabilities for 5 variables: ***vaccination***, ***infection***, ***symptoms***, ***testing***, ***detection***. These variables jointly fully describe our population of interest.
+
+### Definitions
+
+To construct the probability model in **{covidscreen}**, we need to map our inputs and eventual random variables to notation. Here we introduce some conventions. We use italic uppercase to denote variables (i.e. $V$), italic lowercase for constants (i.e. $v$). Bold italic denotes operators (i.e. $\mathbf{P}$). Sets are shown in "blackboard-bold" (i.e. $\mathbb{R}$). Binary variables are assigned truth or falsehood using $\mathbb{T}$ or $\mathbb{F}$; variables with an "unknown" or "inapplicable" value may additionally be assigned a value of $\mathbb{U}$. With these conventions in place, we define our inputs and variables as follows:
+
+#### Inputs (constants)
+
+-   $p_{i_c} \in [0,1]$: Community incidence (proportion)
+-   $p_{V_c} \in [0, 1]$: Community vaccination (proportion)
+-   $p_{V_o} \in [0,1]$: Organization vaccination (proportion)
+-   $p_{I_A} \in [0,1]$: Never symptomatic, i.e. asymptomatic, infections (proportion)
+-   $p_{S_T} \in [0,1]$: Probability of getting tested if symptomatic (proportion)
+-   $e_{V} \in [0,1]$: Vaccine efficacy (restricted to a proportion)
+-   $t_{I} \in \mathbb{R^+}$: Infectious period
+-   $t_{P} \in \mathbb{R^+}$: Pre-symptomatic period
+-   $t_T \in \mathbb{R^+}$: Period between regular testing
+
+#### Variables
+
+-   $V \in \{\mathbb{T,F}\}$: Vaccination (in organization)
+-   $I \in \{\mathbb{T,F}\}$: Infection
+-   $S \in \{\mathbb{T,F,U}\}$: Symptomatic
+-   $T \in \{\mathbb{T,F}\}$: Tested
+-   $D \in \{\mathbb{T,F}\}$: Detected (whether correctly or not)
+
+### Joint Distribution
+
+The joint distribution of our 5 variables of interest is, in the abstract:
+
+$$
+\mathbf{p} = \mathbf{p}(v, i, s, t, d) = \mathbf{P}(V=v \ \text{and}  \ I=i \ \text{and} \ S=s \ \text{and} \ T=t \ \text{and} \ D=d)
+$$
+
+To obtain this distribution, we can apply the chain rule:
+
+\$\$ \begin{align}
+
+\mathbf{p}
+&= \mathbf{p}(v, i, s, t, d) \\
+&= \mathbf{P}(V=v \ \text{and}  \ I=i \ \text{and} \ S=s \ \text{and} \ T=t \ \text{and} \ D=d) \\
+&= \mathbf{P}(V=v) \cdot \mathbf{P}(I=i|V=v) \cdot \mathbf{P}(S=s|I=i,V=v) \cdot \mathbf{P}(T=t|S=s,I=i,V=v) \cdot \mathbf{P}(D=d|T=t,S=s,I=i,V=v)
+
+\end{align} \$\$
+
+#### Vaccination
+
+We start with $\mathbf{P}(V=v)$. The proportion of vaccinated individuals is given by $p_{V_o}$; thus, we know that
+
+$$
+\begin{align}
+\mathbf{P}(V=\mathbb{T}) &= p_{V_o} \\
+\mathbf{P}(V=\mathbb{F}) &= 1-p_{V_o}
+\end{align}
+$$
+
+#### Infection
+
+Next, we turn to $\mathbf{P}(I=i|V=v)$. Given the overall incidence $p_{i_C}$, proportion vaccinated $p_{V_c}$ and efficacy $e_V$, it can be shown that the following equations are true:
+
+$$
+\begin{align}
+p_{i_{c,V=\mathbb{T}}} &=  p_{i_c} \cdot \frac{1 - e_V}{1 - e_V \cdot p_{V_c}} \\
+p_{i_{c,V=\mathbb{F}}} &= p_{i_c} \cdot \frac{1}{1 - e_V \cdot p_{V_c}}
+\end{align}
+$$
+
+where $p_{i_{c,V=\mathbb{T}}}$ and $p_{i_{c,V=\mathbb{F}}}$ are the incidence in the vaccinated and unvaccinated community populations. Since our organizational group is a sample of the surrounding (homogeneous) community, we set the incidence within the organization equal to the incidence outside.
+
+$$
+\begin{align}
+p_{i_{V=\mathbb{T}}} = p_{i_{o,V=\mathbb{T}}} &= p_{i_{c,V=\mathbb{T}}} \\
+p_{i_{V=\mathbb{F}}} = p_{i_{o,V=\mathbb{F}}} &= p_{i_{c,V=\mathbb{F}}}
+\end{align}
+$$
+
+Having calculated incidence, we still need the probability of being currently infected, $\mathbf{P}(I)$. To obtain this quantity, we need to convolve incidence with the infectious period. However, swe assume a constant infectious period $t_I$. We are also uninterested in the "ramp-up" phase, which occurs in the first $t_I-1$ days of an epidemic and during which infections are only added, not removed (due to no one having reached the end of their infectious period). Once transmission has occurred for at least $t_I$ days, it reaches a steady-state under our simplified model. At this point, the convolution simply becomes multiplication, and we have that
+
+$$
+\mathbf{P}(I=\mathbb{T}) = p_I = t_I \cdot p_i
+$$
+
+It follow that
+
+$$
+\begin{align}
+\mathbf{P}(I=\mathbb{T}|V=\mathbb{T}) &= t_I \cdot p_{i_c} \cdot \frac{1 - e_V}{1 - e_V \cdot p_{V_c}} \\
+\mathbf{P}(I=\mathbb{T}|V=\mathbb{F}) &= t_I \cdot p_{i_c} \cdot \frac{1}{1 - e_V \cdot p_{V_c}} \\
+\mathbf{P}(I=\mathbb{F}|V=\mathbb{T}) &= 1 - t_I \cdot p_{i_c} \cdot \frac{1 - e_V}{1 - e_V \cdot p_{V_c}} \\
+\mathbf{P}(I=\mathbb{F}|V=\mathbb{F}) &= 1 - t_I \cdot p_{i_c} \cdot \frac{1}{1 - e_V \cdot p_{V_c}}
+\end{align}
+$$
+
+#### Symptoms
+
+Turning to $\mathbf{P}(S=s|I=i,V=v)$, we first assume that vaccination does not affect the likelihood of developing symptoms, meaning that $S$ and $V$ are independent ($S \perp V \implies \mathbf{P}(S=s|I=i,V=v) = \mathbf{P}(S=s|I=i)$). We further assume that individuals who do not have COVID-19 will not develop symptoms (**IMPLAUSIBLE ASSUMPTIONS HERE**).
+
+We also need to account *pre-symptomatic* infection, the duration of which is given by $t_P$. Since we are again interested only in the steady state, we have that the proportion eventually symptomatic infections ($1-p_{I_A}$) in the pre-symptomatic phase is equal to the proportion of the infectious period spent pre-symptomatic ($\frac{t_P}{t_I}$). Thus the proportion of infections currently pre-symptomatic is:
+
+$$
+p_{I_P} = (1-p_{I_A}) \cdot \frac{t_P}{t_I}
+$$
+
+The proportion of all infections currently not symptomatic is the sum of asymptomatic and pre-symptomatic infections, and the proportion symptomatic is its complement:
+
+$$
+\begin{align}
+p_{I_A} + p_{I_P} &= p_{I_A} + (1-p_{I_A}) \frac{t_P}{t_I}
+\\\\
+p_{I_S} &= 1 - (p_{I_A} + p_{I_P}) \\
+&= 1 - (p_{I_A} + (1-p_{I_A}) \frac{t_P}{t_I}) \\
+&= (1 - p_{I_A}) - \frac{t_P}{t_I}(1-p_{I_A}) \\
+&= (1 - p_{I_A})(1-\frac{t_P}{t_I})
+\end{align}
+$$
+
+With this proportions defined, we are finally in a position to obtain the conditional symptomatic distribution, $\mathbf{P}(S=s|I=i)$:
+
+$$
+\begin{align}
+\mathbf{P}(S=\mathbb{T}|I=\mathbb{T}) &= p_{I_S} \\
+\mathbf{P}(S=\mathbb{T}|I=\mathbb{F}) &= 0 \\
+\mathbf{P}(S=\mathbb{F}|I=\mathbb{T}) &= 1-p_{I_S} \\
+\mathbf{P}(S=\mathbb{F}|I=\mathbb{F}) &= 1
+\end{align}
+$$
+
+#### Testing
+
+Next, we obtain the conditional testing distribution $\mathbf{P}(T=t|S=s,I=i,V=v)$. We assume that being tested is independent of infection, conditional on symptom and vaccination status ($T \perp I | S,V$). We further assume that testing frequency is the same for both vaccinated and unvaccinated individuals ($T \perp V$) **IMPLAUSIBLE ASSUMPTION**. Together with the previous assumption, this implies that testing depends only on symptom status ($\mathbf{P}(T=t|S=s,I=i,V=v) = \mathbf{P}(T=t|S=s)$). The probability of being screened on a given day is then equal to the time between regular screenings, $t_T$. Given the probability of a symptomatic person getting tested ($p_{S_T}$), we obtain the conditional probabilities:
+
+$$
+\begin{align}
+
+\mathbf{P}(T=\mathbb{T}|S=\mathbb{T}) &= p_{S_T} \\
+\mathbf{P}(T=\mathbb{T}|S=\mathbb{F}) &= \frac{1}{t_T} \\
+\mathbf{P}(T=\mathbb{F}|S=\mathbb{T}) &= 1-p_{S_T} \\
+\mathbf{P}(T=\mathbb{F}|S=\mathbb{F}) &= 1 - \frac{1}{t_T}
+\end{align}
+$$
+
+#### Detection
+
+Finally, we come to the probability of "detection"- testing positive. We assume that this is constant over the infectious period for infections. We further assume that detection is independent of vaccination and symptom status, conditional on infection and test status ($D \perp V,S | I,T$). We also assume that the probability of detection is zero if the individual is untested, independent of infection status. The conditional distribution is parameterized by two inputs, sensitivity ($p_\text{sens}$) and specificity ($p_{\text{spec}}$). Given these parameters, we can also define the false positive and false negative rates as their complements. This gives us the conditional distributions:
+
+$$
+\begin{align}
+\mathbf{P}(D=\mathbb{T}|T=\mathbb{T},I=\mathbb{T}) &= p_{\text{sens}} \\
+\mathbf{P}(D=\mathbb{T}|T=\mathbb{T},I=\mathbb{F}) &= 1 - p_{\text{spec}} \\
+\mathbf{P}(D=\mathbb{T}|T=\mathbb{F}) &= 0 \\
+\mathbf{P}(D=\mathbb{F}|T=\mathbb{T},I=\mathbb{T}) &= 1 - p_{\text{sens}} \\
+\mathbf{P}(D=\mathbb{F}|T=\mathbb{T},I=\mathbb{F}) &= p_{\text{spec}} \\
+\mathbf{P}(D=\mathbb{F}|T=\mathbb{F}) &= 1
+\end{align}
+$$
