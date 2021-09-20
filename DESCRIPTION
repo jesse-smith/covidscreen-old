@@ -9,9 +9,11 @@ Description: The {covidscreen} package provides simple simulations
     on a population. It aims to help decision-makers determine whether and how
     to test for COVID-19 with limited resources.
 License: MIT + file LICENSE
-Imports: 
+Imports:
     config (>= 0.3.1),
+    data.table,
     golem (>= 0.3.1),
+    magrittr,
     shiny (>= 1.6.0)
 Encoding: UTF-8
 LazyData: true
