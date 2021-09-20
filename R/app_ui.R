@@ -1,6 +1,6 @@
 #' The application User-Interface
-#' 
-#' @param request Internal parameter for `{shiny}`. 
+#'
+#' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
 #' @import shiny
 #' @noRd
@@ -8,27 +8,29 @@ app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
-    # Your application UI logic 
-    fluidPage(
-      h1("covidscreen")
+    # Your application UI logic
+    material_page_ui(
+      shinymaterial::material_side_nav(),
+      shinymaterial::material_tabs(c("Table" = "tab_table")),
+      shinymaterial::material_tab_content("tab_table", mod_table_ui("probs"))
     )
   )
 }
 
 #' Add external Resources to the Application
-#' 
-#' This function is internally used to add external 
-#' resources inside the Shiny application. 
-#' 
+#'
+#' This function is internally used to add external
+#' resources inside the Shiny application.
+#'
 #' @import shiny
 #' @importFrom golem add_resource_path activate_js favicon bundle_resources
 #' @noRd
 golem_add_external_resources <- function(){
-  
+
   add_resource_path(
     'www', app_sys('app/www')
   )
- 
+
   tags$head(
     favicon(),
     bundle_resources(
@@ -36,7 +38,16 @@ golem_add_external_resources <- function(){
       app_title = 'covidscreen'
     )
     # Add here other external resources
-    # for example, you can add shinyalert::useShinyalert() 
+    # for example, you can add shinyalert::useShinyalert()
   )
 }
 
+material_page_ui <- function(...) {
+  shinymaterial::material_page(
+    title = "COVID-19 Screening",
+    nav_bar_fixed = TRUE,
+    primary_theme_color = "#1565c0",
+    secondary_theme_color = "#82b1ff",
+    ...
+  )
+}
