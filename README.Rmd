@@ -33,6 +33,12 @@ You can install the current version of {covidscreen} with:
 remotes::install_github("jesse-smith/covidscreen")
 ```
 
+## Thoughts
+
+1. Add different % asymptomatic for vaccinated & unvaccinated
+2. Assume Rt constant, rather than infection rate?
+3. Use exponential distributions for time-based variables, rather than constants
+
 ## Example
 
 This is a basic example which shows you how to solve a common problem:
