@@ -197,15 +197,13 @@ $$
 
 Next, we obtain the conditional testing distribution $\mathbf{P}(T=t|S=s,I=i,V=v)$. We assume that being tested is independent of infection, conditional on symptom and vaccination status ($T \perp I | S,V$). We further assume that testing frequency is the same for both vaccinated and unvaccinated individuals ($T \perp V$) **IMPLAUSIBLE ASSUMPTION**. Together with the previous assumption, this implies that testing depends only on symptom status ($\mathbf{P}(T=t|S=s,I=i,V=v) = \mathbf{P}(T=t|S=s)$). The probability of being screened on a given day is then equal to the time between regular screenings, $t_T$. Given the probability of a symptomatic person getting tested ($p_{S_T}$), we obtain the conditional probabilities:
 
-$$
-\begin{align}
+\$\$ \begin{align}
 
 \mathbf{P}(T=\mathbb{T}|S=\mathbb{T}) &= p_{S_T} \\
 \mathbf{P}(T=\mathbb{T}|S=\mathbb{F}) &= \frac{1}{t_T} \\
 \mathbf{P}(T=\mathbb{F}|S=\mathbb{T}) &= 1-p_{S_T} \\
 \mathbf{P}(T=\mathbb{F}|S=\mathbb{F}) &= 1 - \frac{1}{t_T}
-\end{align}
-$$
+\end{align} \$\$
 
 #### Detection
 
