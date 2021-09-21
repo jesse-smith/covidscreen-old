@@ -35,9 +35,9 @@
 calc_dist <- function(
   incid = 0.1,
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
-  inf = list(p_symp = 0.5, t_inf = 10, t_presymp = 5),
-  test   = list(p_symp = 0.9, p_asymp = 1/7),
-  detect = list(sens = 0.97, spec = 0.97)
+  inf = list(p_symp = 0.5, t_symp = 10, t_presymp = 3),
+  test   = list(p_symp = 0.95, p_asymp = 1/7),
+  detect = list(sens = 0.85, spec = 1)
 ) {
 
   # Check arguments
@@ -110,30 +110,28 @@ dist_inf <- function(.inf, .incid, .vac) {
 
 dist_symp <- function(.inf) {
   create_dist(
-    # Only applies to infected group
-    inf  = TRUE,
-    # Probs conditional on symptomatic status
-    symp = c(TRUE, FALSE),
+    # Probs conditional on infection and symptomatic status
+    inf  = c(TRUE, FALSE, TRUE, FALSE),
+    symp = c(TRUE, TRUE, FALSE, FALSE),
     .p   = probs_symp(.inf)
   )
 }
 
 dist_test <- function(.test) {
   create_dist(
-    # Probs conditional on symptomatic and test status
-    symp = c(TRUE, FALSE,  NA, TRUE,  FALSE,    NA),
-    test = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE),
+    # Probs conditional on symptoms and test status
+    symp = c(TRUE, FALSE, TRUE, FALSE),
+    test = c(TRUE, TRUE, FALSE, FALSE),
     .p   = probs_test(.test)
   )
 }
 
 dist_detect <- function(.detect) {
   create_dist(
-    # Only applies to tested group
-    test   = TRUE,
-    # Probs are conditional on infection and detection status
-    inf    = c(TRUE, FALSE, TRUE, FALSE),
-    detect = c(TRUE, TRUE, FALSE, FALSE),
+    # Probabilities conditional on infection, testing, and detection
+    inf    = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE),
+    test   = c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE),
+    detect = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
     .p     = probs_detect(.detect)
   )
 }
@@ -162,7 +160,7 @@ probs_inf <- function(inf, incid, vac) {
   # Combine
   p_incid <- c(v = p_incid_v, u = p_incid_u)
   # Scale from incidence to infection probabilities (assuming constant t_inf)
-  p_inf   <- pmin(1, p_incid * inf$t_inf)
+  p_inf   <- pmin(1, p_incid * (inf$t_symp + inf$t_presymp))
   # Add complements and return
   # (order is {inf_vac, inf_unvac, uninf_vac, uninf_unvac})
   c(p_inf, 1 - p_inf)
@@ -170,23 +168,24 @@ probs_inf <- function(inf, incid, vac) {
 
 probs_symp <- function(inf) {
   # Account for presymptomatic illness
-  p_symp <- inf$p_symp * (1 - inf$t_presymp / inf$t_inf)
+  p_symp <- inf$p_symp * (1 - inf$t_presymp / (inf$t_presymp + inf$t_symp))
   # Add complement and return
-  c(p_symp, 1 - p_symp)
+  c(p_symp, 0, 1 - p_symp, 1)
 }
 
 probs_test <- function(test) {
-  # Add prob for NA (not ill - same as asymptomatic)
-  p_na <- test$p_asymp
+  # Symptomatic is <= asymptomatic
+  p_symp <- max(test$p_symp, test$p_asymp)
   # Combine
-  p_t <- c(test$p_symp, test$p_asymp, p_na)
+  p_test <- c(p_symp, test$p_asymp)
   # Add complements and return
-  c(p_t, 1 - p_t)
+  c(p_test, 1 - p_test)
 }
 
 probs_detect <- function(detect) {
-  # Combine
-  p_d <- c(detect$sens, 1 - detect$spec)
+  # Combine and add probabilities for not tested (0)
+  p_d <- c(detect$sens, 1 - detect$spec, 0, 0)
+
   # Add complements and return
   c(p_d, 1 - p_d)
 }
@@ -228,10 +227,10 @@ assert_inf <- function(inf) {
   inf_assertions <- checkmate::makeAssertCollection()
   # Proportion of infections symptomatic
   assert_non_negative(inf$p_symp,    upper = 1,         add = inf_assertions)
-  # Duration of infectious period
-  assert_non_negative(inf$t_inf,                        add = inf_assertions)
-  # Duration of pre-symptomatic period (must be <= infectious period)
-  assert_non_negative(inf$t_presymp, upper = inf$t_inf, add = inf_assertions)
+  # Duration of symptomatic period
+  assert_non_negative(inf$t_symp,                       add = inf_assertions)
+  # Duration of pre-symptomatic period
+  assert_non_negative(inf$t_presymp,                    add = inf_assertions)
   # Throw all collected errors
   checkmate::reportAssertions(inf_assertions)
   # Invisibly return input to match checkmate behavior

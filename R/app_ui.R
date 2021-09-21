@@ -10,9 +10,13 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     material_page_ui(
-      shinymaterial::material_side_nav(),
-      shinymaterial::material_tabs(c("Table" = "tab_table")),
-      shinymaterial::material_tab_content("tab_table", mod_table_ui("probs"))
+      shinymaterial::material_row(
+        shinymaterial::material_column(
+          width = 4,
+          mod_input_params_ui("mod_input_params_sim")
+        ),
+        shinymaterial::material_column(width = 8, mod_table_ui("mod_table_probs"))
+      )
     )
   )
 }

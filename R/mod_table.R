@@ -18,12 +18,15 @@ mod_table_ui <- function(id){
 #' table Server Functions
 #'
 #' @noRd
-mod_table_server <- function(id){
+mod_table_server <- function(id, dist_params){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
     # Calculate distribution
-    dist <- calc_dist()
+    dist <- reactive(dist_yn(
+      do.call(calc_dist, dist_params()),
+      cols = c("vac", "inf", "symp", "test", "detect")
+    ))
 
     # Define all possible table columns
     col_def <- list(
@@ -40,7 +43,7 @@ mod_table_server <- function(id){
 
     # Output table
     output$table <- reactable::renderReactable(reactable::reactable(
-      dist_data(dist, cols = input$col_select),
+      dist_data(dist(), cols = input$col_select),
       columns = col_def[c("p", input$col_select)],
       resizable = TRUE,
       defaultSortOrder = "desc",
@@ -123,13 +126,25 @@ mod_table_ui_row_table <- function(ns) {
 #'
 #' @noRd
 dist_data <- function(dist, cols) {
-  suppressWarnings(data.table::setorderv(
+  dist_summ <- suppressWarnings(data.table::setorderv(
     dist[, .(p = sum(.SD$p)), by = cols],
     cols = cols,
     order = -1L,
     na.last = TRUE
-  ))[]
+  ))
+
+  dist_summ[]
 }
+
+dist_yn <- function(data, cols) {
+  data[, c(cols) := lapply(.SD, lgl_to_str), .SDcols = cols][]
+}
+
+lgl_to_str <- function(x, true = "Yes", false = "No", na = "—") {
+  data.table::fifelse(x, yes = true, no = false, na = na)
+}
+
+
 
 #' Simplified Column Definitions for {reactable}
 #'
