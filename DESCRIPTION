@@ -31,3 +31,5 @@ Suggests:
 Config/testthat/edition: 3
 Language: en-US
 VignetteBuilder: knitr
+URL: https://github.com/jesse-smith/covidscreen
+BugReports: https://github.com/jesse-smith/covidscreen/issues
