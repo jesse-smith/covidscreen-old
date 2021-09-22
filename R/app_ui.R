@@ -15,7 +15,10 @@ app_ui <- function(request) {
           width = 4,
           mod_input_params_ui("mod_input_params_sim")
         ),
-        shinymaterial::material_column(width = 8, mod_table_ui("mod_table_probs"))
+        shinymaterial::material_column(
+          width = 8,
+          mod_table_ui("mod_table_probs")
+        )
       )
     )
   )

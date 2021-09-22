@@ -10,8 +10,8 @@
 mod_table_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_table_ui_row_table(ns),
-    mod_table_ui_row_sort(ns)
+    mod_table_ui_table(ns),
+    mod_table_ui_sort(ns)
   )
 }
 
@@ -60,7 +60,7 @@ mod_table_server <- function(id, dist_params){
 #' @return `[material_row]` Row with sortable bucket list
 #'
 #' @noRd
-mod_table_ui_row_sort <- function(ns) {
+mod_table_ui_sort <- function(ns, depth = NULL) {
 
   vac <- tags$div(
     HTML(paste(tags$b("V"), "- Vaccinated")),
@@ -117,9 +117,7 @@ mod_table_ui_row_sort <- function(ns) {
   )
 
   # Show bucket list
-  shinymaterial::material_row(
-    shinymaterial::material_card(title = "Columns", col_bucket)
-  )
+  shinymaterial::material_card(title = "Columns", depth = depth, col_bucket)
 }
 
 
@@ -130,10 +128,11 @@ mod_table_ui_row_sort <- function(ns) {
 #' @return `[material_row]`
 #'
 #' @noRd
-mod_table_ui_row_table <- function(ns) {
+mod_table_ui_table <- function(ns, depth = NULL) {
   # Show table
-  shinymaterial::material_row(
-    shinymaterial::material_card(reactable::reactableOutput(ns("table")))
+  shinymaterial::material_card(
+    depth = depth,
+    reactable::reactableOutput(ns("table"))
   )
 }
 

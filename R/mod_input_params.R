@@ -7,12 +7,12 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_input_params_ui <- function(id){
+mod_input_params_ui <- function(id, depth = NULL){
   ns <- NS(id)
   tagList(
-    mod_input_params_ui_intervention(ns),
-    mod_input_params_ui_context(ns),
-    mod_input_params_ui_advanced(ns)
+    mod_input_params_ui_intervention(ns, depth = depth),
+    mod_input_params_ui_context(ns, depth = depth),
+    mod_input_params_ui_advanced(ns, depth = depth)
   )
 }
 
@@ -75,9 +75,9 @@ mod_input_params_server <- function(id){
   })
 }
 
-mod_input_params_ui_intervention <- function(ns) {
+mod_input_params_ui_intervention <- function(ns, depth = NULL) {
   shinymaterial::material_card(
-    title = NULL,
+    depth = depth,
     shinymaterial::material_button(
       ns("btn_interventions"),
       label = "Interventions",
@@ -107,9 +107,9 @@ mod_input_params_ui_intervention <- function(ns) {
   )
 }
 
-mod_input_params_ui_context <- function(ns) {
+mod_input_params_ui_context <- function(ns, depth = NULL) {
   shinymaterial::material_card(
-    title = NULL,
+    depth = depth,
     shinymaterial::material_button(
       ns("btn_context"),
       label = "Community Context",
@@ -139,9 +139,9 @@ mod_input_params_ui_context <- function(ns) {
   )
 }
 
-mod_input_params_ui_advanced <- function(ns) {
+mod_input_params_ui_advanced <- function(ns, depth = NULL) {
   shinymaterial::material_card(
-    title = NULL,
+    depth = depth,
     shinymaterial::material_button(
       ns("btn_advanced"),
       "Advanced Settings",
