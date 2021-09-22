@@ -1,6 +1,6 @@
 Package: covidscreen
 Title: Simulate Asymptomatic Screening for COVID-19
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person('Jesse', 'Smith', email = 'Jesse.Smith@stjude.org', role = c('cre', 'aut')),
     person('Tomi',  'Mori',  email = 'Tomi.Mori@stjude.org',   role = 'aut'))
