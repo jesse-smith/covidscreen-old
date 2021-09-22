@@ -7,13 +7,20 @@
 calc_dist(
   incid = 0.1,
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
-  inf = list(p_symp = 0.5, t_inf = 10, t_presymp = 5),
-  test = list(p_symp = 0.9, p_asymp = 1/7),
-  detect = list(sens = 0.97, spec = 0.97)
+  inf = list(p_symp = 0.5, t_symp = 10, t_presymp = 3),
+  test = list(p_symp = 0.95, p_asymp = 1/7),
+  detect = list(sens = 0.85, spec = 1)
 )
 }
 \arguments{
 \item{incid}{`[numeric(1)]` Incidence rate per 100k per day in the community}
+
+\item{vac}{`[list(3)]` A named list containing vaccination parameters:
+\describe{
+  \item{p_comm `[numeric(1)]`}{Proportion vaccinated in the community}
+  \item{p_org `[numeric(1)]`}{Proportion vaccinated in the organization of interest}
+  \item{eff `[numeric(1)]`}{Vaccine efficacy}
+}}
 
 \item{inf}{`[list(3)]` A named list containing infection parameters:
 \describe{
@@ -32,13 +39,6 @@ calc_dist(
 \describe{
   \item{sens `[numeric(1)]`}{Test sensitivity}
   \item{spec `[numeric(1)]`}{Test specificity}
-}}
-
-\item{`vac`}{`[list(3)]` A named list containing vaccination parameters:
-\describe{
-  \item{p_comm `[numeric(1)]`}{Proportion vaccinated in the community}
-  \item{p_org `[numeric(1)]`}{Proportion vaccinated in the organization of interest}
-  \item{eff `[numeric(1)]`}{Vaccine efficacy}
 }}
 }
 \description{

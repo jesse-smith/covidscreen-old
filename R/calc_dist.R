@@ -7,7 +7,7 @@
 #'
 #' @param incid `[numeric(1)]` Incidence rate per 100k per day in the community
 #'
-#' @param `vac` `[list(3)]` A named list containing vaccination parameters:
+#' @param vac `[list(3)]` A named list containing vaccination parameters:
 #'   \describe{
 #'     \item{p_comm `[numeric(1)]`}{Proportion vaccinated in the community}
 #'     \item{p_org `[numeric(1)]`}{Proportion vaccinated in the organization of interest}
@@ -41,13 +41,13 @@ calc_dist <- function(
 ) {
 
   # Check arguments
-  assert_args(
-    incid = incid,
-    vac = vac,
-    inf = inf,
-    test = test,
-    detect = detect
-  )
+  # assert_args(
+  #   incid = incid,
+  #   vac = vac,
+  #   inf = inf,
+  #   test = test,
+  #   detect = detect
+  # )
 
   # Create conditional distributions
   dt_vac    <- dist_vac(vac)
@@ -63,9 +63,8 @@ calc_dist <- function(
     join_dist(dt_test) %>%
     join_dist(dt_detect) %>%
     # Set key and reorder columns
-    data.table::setkeyv(c("vac", "inf", "symp", "test", "detect")) %>%
-    data.table::setcolorder(c("p", "vac", "inf", "symp", "test", "detect")) %>%
-    data.table::setorderv(order = -1L, na.last = TRUE) %>%
+    setcolorder(c("p", "vac", "inf", "symp", "test", "detect")) %>%
+    setorderv(order = -1L, na.last = TRUE) %>%
     # Workaround to print on return after modify-by-reference
     .[]
 }
@@ -77,7 +76,7 @@ join_dist <- function(x, y) {
   cols_common <- intersect(colnames(x), colnames(y))
   by <- cols_common[!cols_common %chin% "p"]
   # Left join distribution data tables
-  d <- data.table::merge.data.table(
+  d <- merge.data.table(
     x,
     y,
     by = by,
@@ -85,8 +84,11 @@ join_dist <- function(x, y) {
     suffixes = c("", "_y"),
     allow.cartesian = TRUE
   )
+
+  # Fill missing conditional probs
+  setnafill(d, fill = 1, cols = "p_y")
   # Multiply probabilities and remove conditional probs
-  d[, p := .SD$p * data.table::nafill(.SD$p_y, fill = 1)][, p_y := NULL]
+  d[, "p" := .SD$p * .SD$p_y][, "p_y" := NULL]
 }
 
 # Create Distributions ---------------------------------------------------------
@@ -138,12 +140,12 @@ dist_detect <- function(.detect) {
 
 create_dist <- function(..., .p) {
   # Create data table
-  dt  <- data.table::data.table(..., p = .p)
+  dt  <- data.table(..., p = .p)
   # Create key from all columns except `p`
   cols <- colnames(dt)
   key  <- cols[!cols %chin% "p"]
   # Set key and return
-  data.table::setkeyv(dt, cols = key)
+  setkeyv(dt, cols = key)
 }
 
 # Probability Calculations -----------------------------------------------------
@@ -188,77 +190,4 @@ probs_detect <- function(detect) {
 
   # Add complements and return
   c(p_d, 1 - p_d)
-}
-
-# Assertions -------------------------------------------------------------------
-
-assert_args <- function(incid, vac, inf, test, detect) {
-  # Check incidence
-  assert_non_negative(incid, upper = 1e5)
-  # Check vaccine parameters
-  assert_vac(vac)
-  # Check infection parameters
-  assert_inf(inf)
-  # Check testing parameters
-  assert_test(test)
-  # Check detection parameters
-  assert_detect(detect)
-  # Return `NULL` instead of last parameter set checked
-  return(NULL)
-}
-
-assert_vac <- function(vac) {
-  # Report any failures all at once with an `AssertCollection`
-  vac_assertions <- checkmate::makeAssertCollection()
-  # Proportion of community vaccinated
-  assert_non_negative(vac$p_comm, upper = 1, add = vac_assertions)
-  # Proportion of organization vaccinated
-  assert_non_negative(vac$p_org,  upper = 1, add = vac_assertions)
-  # Efficacy can technically be < 0, but this is assumed to be incorrect here
-  assert_non_negative(vac$eff,    upper = 1, add = vac_assertions)
-  # Throw all collected errors
-  checkmate::reportAssertions(vac_assertions)
-  # Invisibly return input to match checkmate behavior
-  invisible(vac)
-}
-
-assert_inf <- function(inf) {
-  # Report any failures all at once with an `AssertCollection`
-  inf_assertions <- checkmate::makeAssertCollection()
-  # Proportion of infections symptomatic
-  assert_non_negative(inf$p_symp,    upper = 1,         add = inf_assertions)
-  # Duration of symptomatic period
-  assert_non_negative(inf$t_symp,                       add = inf_assertions)
-  # Duration of pre-symptomatic period
-  assert_non_negative(inf$t_presymp,                    add = inf_assertions)
-  # Throw all collected errors
-  checkmate::reportAssertions(inf_assertions)
-  # Invisibly return input to match checkmate behavior
-  invisible(inf)
-}
-
-assert_test <- function(test) {
-  # Report any failures all at once with an `AssertCollection`
-  test_assertions <- checkmate::makeAssertCollection()
-  # Proportion of symptomatic + ill individuals who are tested
-  assert_non_negative(test$p_symp,  upper = 1, add = test_assertions)
-  # Proportion of asymptomatic individuals who are tested
-  assert_non_negative(test$p_asymp, upper = 1, add = test_assertions)
-  # Throw all collected errors
-  checkmate::reportAssertions(test_assertions)
-  # Invisibly return input to match checkmate behavior
-  invisible(test)
-}
-
-assert_detect <- function(detect) {
-  # Report any failures all at once with an `AssertCollection`
-  detect_assertions <- checkmate::makeAssertCollection()
-  # Test sensitivity
-  assert_non_negative(detect$sens, upper = 1, add = detect_assertions)
-  # Test specificity
-  assert_non_negative(detect$spec, upper = 1, add = detect_assertions)
-  # Throw all collected errors
-  checkmate::reportAssertions(detect_assertions)
-  # Invisibly return input to match checkmate behavior
-  invisible(detect)
 }

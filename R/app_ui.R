@@ -9,17 +9,17 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    material_page_ui(
-      shinymaterial::material_row(
-        shinymaterial::material_column(
-          width = 4,
-          mod_input_params_ui("mod_input_params_sim")
-        ),
-        shinymaterial::material_column(
-          width = 8,
-          mod_table_ui("mod_table_probs")
-        )
-      )
+    material_sidebar_page(
+      tags$div(style = "padding: 0.9em", tags$br(), mod_input_params_ui("params")),
+      material_card(
+        material_tabs(c(About = "about", Table = "table"))
+      ),
+      material_row(tags$div(material_column(
+        offset = 1,
+        width = 10,
+        material_tab_content("about", mod_about_ui("about")),
+        material_tab_content("table", mod_table_ui("table"))
+      )))
     )
   )
 }
@@ -39,7 +39,7 @@ golem_add_external_resources <- function(){
   )
 
   tags$head(
-    favicon(),
+    favicon(ext = "png"),
     bundle_resources(
       path = app_sys('app/www'),
       app_title = 'covidscreen'
@@ -49,12 +49,23 @@ golem_add_external_resources <- function(){
   )
 }
 
-material_page_ui <- function(...) {
-  shinymaterial::material_page(
-    title = "COVID-19 Screening",
-    nav_bar_fixed = TRUE,
-    primary_theme_color = "#1565c0",
-    secondary_theme_color = "#82b1ff",
-    ...
+material_sidebar_page <- function(
+  sidebar_panel,
+  ...,
+  position = c("left", "right"),
+  fluid = TRUE
+) {
+  material_page(
+    title = "COVID Screening",
+    nav_bar_fixed = FALSE,
+    primary_theme_color = "#cc1e27",
+    secondary_theme_color = "#e57373",
+    ...,
+    material_side_nav(
+      sidebar_panel,
+      fixed = TRUE,
+      image_source = "www/favicon_resized.png",
+      background_color = "grey lighten-4"
+    )
   )
 }

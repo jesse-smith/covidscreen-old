@@ -38,6 +38,7 @@ mod_input_params_server <- function(id){
     inf_p_symp <- reactive((100 - input$inf_p_asymp) * 0.01)
     test_p_symp <- reactive(input$test_p_symp * 0.01)
     detect_sens <- reactive(input$detect_sens * 0.01)
+    detect_spec <- reactive(input$detect_spec * 0.01)
 
     # Group into `calc_dist()` inputs
 
@@ -61,8 +62,8 @@ mod_input_params_server <- function(id){
     ))
 
     detect <- reactive(list(
-      sens = 0.97,
-      spec = 0.97
+      sens = detect_sens(),
+      spec = detect_spec()
     ))
 
     reactive(list(
@@ -76,9 +77,9 @@ mod_input_params_server <- function(id){
 }
 
 mod_input_params_ui_intervention <- function(ns, depth = NULL) {
-  shinymaterial::material_card(
+  material_card(
     depth = depth,
-    shinymaterial::material_button(
+    material_button(
       ns("btn_interventions"),
       label = "Interventions",
       icon = "tune"
@@ -87,7 +88,7 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
       condition = "input.btn_interventions % 2 == 0",
       ns = ns,
       tags$br(),
-      shinymaterial::material_number_box(
+      material_number_box(
         ns("test_freq"),
         label = "Testing Frequency (Days)",
         min_value = 1,
@@ -95,7 +96,7 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
         initial_value = 7,
         step_size = 1
       ),
-      shinymaterial::material_slider(
+      material_slider(
         ns("vac_org"),
         label = "Vaccinated (% in Organization)",
         min_value = 0,
@@ -108,9 +109,9 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
 }
 
 mod_input_params_ui_context <- function(ns, depth = NULL) {
-  shinymaterial::material_card(
+  material_card(
     depth = depth,
-    shinymaterial::material_button(
+    material_button(
       ns("btn_context"),
       label = "Community Context",
       icon  = "people"
@@ -119,7 +120,7 @@ mod_input_params_ui_context <- function(ns, depth = NULL) {
       condition = "input.btn_context % 2 == 0",
       ns = ns,
       tags$br(),
-      shinymaterial::material_number_box(
+      material_number_box(
         ns("incid"),
         label = "Case Rate (per 100k per Day)",
         min_value = 0,
@@ -127,7 +128,7 @@ mod_input_params_ui_context <- function(ns, depth = NULL) {
         initial_value = 100,
         step_size = 10
       ),
-      shinymaterial::material_slider(
+      material_slider(
         ns("vac_comm"),
         label = "Vaccinated (% in Community)",
         min_value = 0,
@@ -140,9 +141,9 @@ mod_input_params_ui_context <- function(ns, depth = NULL) {
 }
 
 mod_input_params_ui_advanced <- function(ns, depth = NULL) {
-  shinymaterial::material_card(
+  material_card(
     depth = depth,
-    shinymaterial::material_button(
+    material_button(
       ns("btn_advanced"),
       "Advanced Settings",
       icon = "settings"
@@ -151,7 +152,7 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
       condition = "input.btn_advanced % 2 != 0",
       ns = ns,
       tags$br(),
-      shinymaterial::material_slider(
+      material_slider(
         ns("vac_eff"),
         label = "Vaccine Efficacy (%)",
         min_value = 0,
@@ -159,7 +160,7 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
         initial_value = 70,
         step_size = 1
       ),
-      shinymaterial::material_number_box(
+      material_number_box(
         ns("inf_t_symp"),
         label = "Symptomatic Period (Days)",
         min_value = 1,
@@ -167,7 +168,7 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
         initial_value = 10,
         step_size = 1
       ),
-      shinymaterial::material_number_box(
+      material_number_box(
         ns("inf_t_presymp"),
         label = "Pre-symptomatic Period (Days)",
         min_value = 0,
@@ -175,23 +176,23 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
         initial_value = 3,
         step_size = 1
       ),
-      shinymaterial::material_slider(
+      material_slider(
         ns("inf_p_asymp"),
-        label = "Asymptomatic Infections (% All Infections)",
+        label = "% of Infections Asymptomatic",
         min_value = 0,
         max_value = 100,
         initial_value = 50,
         step_size = 1
       ),
-      shinymaterial::material_slider(
+      material_slider(
         ns("test_p_symp"),
-        label = "Symptomatics Tested (% All Symptomatics)",
+        label = "% of Symptomatics Tested",
         min_value = 0,
         max_value = 100,
         initial_value = 95,
         step_size = 1
       ),
-      shinymaterial::material_slider(
+      material_slider(
         ns("detect_sens"),
         label = "Test Sensitivity (%)",
         min_value = 0,
@@ -199,7 +200,7 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
         initial_value = 85,
         step_size = 1
       ),
-      shinymaterial::material_slider(
+      material_slider(
         ns("detect_spec"),
         label = "Test Specificity (%)",
         min_value = 0,

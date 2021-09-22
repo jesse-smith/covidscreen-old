@@ -18,17 +18,14 @@ mod_table_ui <- function(id){
 #' table Server Functions
 #'
 #' @noRd
-mod_table_server <- function(id, dist_params){
+mod_table_server <- function(id, dist){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
     cols <- c("vac", "inf", "symp", "test", "detect")
 
     # Calculate distribution
-    dist <- reactive(dist_yn(
-      do.call(calc_dist, dist_params()),
-      cols = cols
-    ))
+    dist_chr <- reactive(dist_yn(dist(), cols = cols))
 
     # Get grouped columns
     grp <- reactive(c(
@@ -40,17 +37,35 @@ mod_table_server <- function(id, dist_params){
     ))
 
     col_grouped <- reactive(intersect(cols[grp()], input$col_select))
-    col_select <- reactive(setdiff(input$col_select, col_grouped()))
+    col_select  <- reactive(setdiff(input$col_select, col_grouped()))
 
     # Output table
-    output$table <- reactable::renderReactable(
-      create_table(
-        dist(),
+    output$table <- renderReactable({
+      material_spinner_show(session, ns("table"))
+      tbl <- create_table(
+        dist_chr(),
         select  = col_select(),
         grouped = col_grouped()
       )
-    )
+      material_spinner_hide(session, ns("table"))
+      tbl
+    })
   })
+}
+
+#' Create Row containing Joint Distribution Table
+#'
+#' @param ns Module namespace
+#'
+#' @return `[material_row]`
+#'
+#' @noRd
+mod_table_ui_table <- function(ns, depth = NULL) {
+  # Show table
+  material_card(
+    depth = depth,
+    reactableOutput(ns("table"))
+  )
 }
 
 #' Create Row Containing Sortable Column List
@@ -63,32 +78,32 @@ mod_table_server <- function(id, dist_params){
 mod_table_ui_sort <- function(ns, depth = NULL) {
 
   vac <- tags$div(
-    HTML(paste(tags$b("V"), "- Vaccinated")),
-    shinymaterial::material_switch(ns("vac_group"), on_label = "Grouped")
+    "Vaccinated",
+    material_switch(ns("vac_group"), on_label = "Grouped")
   )
 
   inf <- tags$div(
-    HTML(paste(tags$b("I"), "- Infected")),
-    shinymaterial::material_switch(ns("inf_group"), on_label = "Grouped", initial_value = TRUE)
+    "Infected",
+    material_switch(ns("inf_group"), on_label = "Grouped", initial_value = TRUE)
   )
 
   symp <- tags$div(
-    HTML(paste(tags$b("S"), "- Symptomatic")),
-    shinymaterial::material_switch(ns("symp_group"), on_label = "Grouped")
+    "Symptomatic",
+    material_switch(ns("symp_group"), on_label = "Grouped")
   )
 
   test <- tags$div(
-    HTML(paste(tags$b("T"), "- Tested")),
-    shinymaterial::material_switch(ns("test_group"), on_label = "Grouped")
+    "Tested",
+    material_switch(ns("test_group"), on_label = "Grouped")
   )
 
   detect <- tags$div(
-    HTML(paste(tags$b("D"), "- Detected")),
-    shinymaterial::material_switch(ns("detect_group"), on_label = "Grouped")
+    "Detected",
+    material_switch(ns("detect_group"), on_label = "Grouped")
   )
 
   # Create a sortable list of hidden table columns
-  col_list_all <- sortable::add_rank_list(
+  col_list_all <- add_rank_list(
     "Available",
     labels = list(
       vac = vac,
@@ -98,7 +113,7 @@ mod_table_ui_sort <- function(ns, depth = NULL) {
   )
 
   # Create a sortable list of shown table columns
-  col_list_select <- sortable::add_rank_list(
+  col_list_select <- add_rank_list(
     "Selected",
     labels = list(
       test = test,
@@ -109,7 +124,7 @@ mod_table_ui_sort <- function(ns, depth = NULL) {
   )
 
   # Combine into bucket list
-  col_bucket <- sortable::bucket_list(
+  col_bucket <- bucket_list(
     header = NULL,
     col_list_all,
     col_list_select,
@@ -117,46 +132,30 @@ mod_table_ui_sort <- function(ns, depth = NULL) {
   )
 
   # Show bucket list
-  shinymaterial::material_card(title = "Columns", depth = depth, col_bucket)
-}
-
-
-#' Create Row containing Joint Distribution Table
-#'
-#' @param ns Module namespace
-#'
-#' @return `[material_row]`
-#'
-#' @noRd
-mod_table_ui_table <- function(ns, depth = NULL) {
-  # Show table
-  shinymaterial::material_card(
-    depth = depth,
-    reactable::reactableOutput(ns("table"))
-  )
+  material_card(title = "Columns", depth = depth, col_bucket)
 }
 
 dist_yn <- function(data, cols) {
   data[, c(cols) := lapply(.SD, lgl_to_str), .SDcols = cols][]
 }
 
-lgl_to_str <- function(x, true = "Yes", false = "No", na = "—") {
-  data.table::fifelse(x, yes = true, no = false, na = na)
+lgl_to_str <- function(x, true = "Yes", false = "No", na = "-") {
+  fifelse(x, yes = true, no = false, na = na)
 }
 
 create_table <- function(dist, select, grouped) {
 
   # Define all possible table columns
   col_def <- list(
-    vac = react_col_def("V"),
-    inf = react_col_def("I"),
-    symp = react_col_def("S"),
-    test = react_col_def("T"),
-    detect = react_col_def("D"),
+    vac = react_col_def("Vaccinated"),
+    inf = react_col_def("Infected"),
+    symp = react_col_def("Symptomatic"),
+    test = react_col_def("Tested"),
+    detect = react_col_def("Detected"),
     p = react_col_def(
       "%",
       aggregate = "sum",
-      format = reactable::colFormat(digits = 1, percent = TRUE)
+      format = colFormat(digits = 1, percent = TRUE)
     )
   )
 
@@ -168,7 +167,7 @@ create_table <- function(dist, select, grouped) {
     dist_nest <- dist[data_grp[i], on = select]
     tags$div(
       style = "padding: 16px",
-      reactable::reactable(
+      reactable(
         dist_data(dist_nest, cols = grouped, norm = TRUE),
         columns = col_def[c(grouped, "p")],
         outlined = TRUE,
@@ -178,15 +177,16 @@ create_table <- function(dist, select, grouped) {
     )
   }
 
-  reactable::reactable(
+  reactable(
     dist_grp,
     details = detail_fn,
     columns = col_def[c(select, "p")],
     resizable = TRUE,
     defaultSortOrder = "desc",
-    pagination = FALSE,
     highlight = TRUE,
-    compact = TRUE
+    compact = TRUE,
+    wrap = FALSE,
+    onClick = "expand"
   )
 }
 
@@ -201,14 +201,14 @@ create_table <- function(dist, select, grouped) {
 #'
 #' @noRd
 dist_data <- function(dist, cols, norm = FALSE) {
-  dist_summ <- suppressWarnings(data.table::setorderv(
+  dist_summ <- suppressWarnings(setorderv(
     dist[, .(p = sum(.SD$p)), by = c(cols)][],
     cols = cols,
     order = -1L,
     na.last = TRUE
   ))
 
-  if (norm) dist_summ[, p := .SD$p / sum(.SD$p)][] else dist_summ[]
+  if (norm) dist_summ[, "p" := .SD$p / sum(.SD$p)][] else dist_summ[]
 }
 
 #' Simplified Column Definitions for {reactable}
@@ -221,12 +221,12 @@ dist_data <- function(dist, cols, norm = FALSE) {
 #'
 #' @noRd
 react_col_def <- function(name = NULL, aggregate = NULL, format = NULL) {
-  reactable::colDef(
+  colDef(
     name,
     aggregate = aggregate,
     sortNALast = TRUE,
     format = format,
-    na = "—"
+    na = "-"
   )
 }
 
