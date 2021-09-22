@@ -11,3 +11,5 @@ $run_dev.*
 ^Meta$
 ^app\.R$
 ^rsconnect$
+^\.github$
+^codecov\.yml$

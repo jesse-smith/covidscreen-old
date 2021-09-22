@@ -17,6 +17,8 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![R-CMD-check](https://github.com/jesse-smith/covidscreen/workflows/R-CMD-check/badge.svg)](https://github.com/jesse-smith/covidscreen/actions)
+[![Codecov test coverage](https://codecov.io/gh/jesse-smith/covidscreen/branch/master/graph/badge.svg)](https://codecov.io/gh/jesse-smith/covidscreen?branch=master)
 <!-- badges: end -->
 
 The goal of {covidscreen} is to provides simple simulations for understanding

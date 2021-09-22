@@ -27,7 +27,8 @@ Suggests:
     knitr,
     spelling,
     testthat (>= 3.0.0),
-    qpdf
+    qpdf,
+    covr
 Config/testthat/edition: 3
 Language: en-US
 VignetteBuilder: knitr
