@@ -10,8 +10,8 @@
 mod_table_ui <- function(id){
   ns <- NS(id)
   tagList(
-    mod_table_ui_row_sort(ns),
-    mod_table_ui_row_table(ns)
+    mod_table_ui_row_table(ns),
+    mod_table_ui_row_sort(ns)
   )
 }
 
