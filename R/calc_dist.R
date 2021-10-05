@@ -37,7 +37,11 @@ calc_dist <- function(
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
   # Infection parameters
   inf = list(p_incid = 0.5, p_symp = 0.5, t_symp = 10, t_presymp = 3),
+  # Symptom parameters
+  symp   = list(p_vac_inf = 0.5, p_unvac_inf = 0.5, p_uninf = 0),
+  # Test parameters
   test   = list(p_symp = 0.95, p_asymp = 1/7),
+  # Detection parameters
   detect = list(sens = 0.85, spec = 1)
 ) {
 
