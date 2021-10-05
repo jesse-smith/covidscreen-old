@@ -33,9 +33,10 @@
 #'     \item{spec `[numeric(1)]`}{Test specificity}
 #'   }
 calc_dist <- function(
-  incid = 0.1,
+  # Vaccination parameters
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
-  inf = list(p_symp = 0.5, t_symp = 10, t_presymp = 3),
+  # Infection parameters
+  inf = list(p_incid = 0.5, p_symp = 0.5, t_symp = 10, t_presymp = 3),
   test   = list(p_symp = 0.95, p_asymp = 1/7),
   detect = list(sens = 0.85, spec = 1)
 ) {
@@ -51,7 +52,7 @@ calc_dist <- function(
 
   # Create conditional distributions
   dt_vac    <- dist_vac(vac)
-  dt_inf    <- dist_inf(inf, .incid = incid, .vac = vac)
+  dt_inf    <- dist_inf(inf, .vac = vac)
   dt_symp   <- dist_symp(inf)
   dt_test   <- dist_test(test)
   dt_detect <- dist_detect(detect)
@@ -101,12 +102,12 @@ dist_vac <- function(.vac) {
   )
 }
 
-dist_inf <- function(.inf, .incid, .vac) {
+dist_inf <- function(.inf, .vac) {
   create_dist(
     # Probs conditional on vaccination and infection status
     vac = c(TRUE, FALSE, TRUE, FALSE),
     inf = c(TRUE, TRUE, FALSE, FALSE),
-    .p   = probs_inf(.inf, incid = .incid, vac = .vac)
+    .p   = probs_inf(.inf, vac = .vac)
   )
 }
 
@@ -155,9 +156,9 @@ probs_vac <- function(vac) {
   c(vac$p_org, 1 - vac$p_org)
 }
 
-probs_inf <- function(inf, incid, vac) {
+probs_inf <- function(inf, vac) {
   # Uncorrected incidence "probabilities" within each group (may be > 1)
-  p_incid_u <- incid / (1 - vac$p_comm * vac$eff)
+  p_incid_u <- inf$p_incid / (1 - vac$p_comm * vac$eff)
   p_incid_v <- p_incid_u * (1 - vac$eff)
   # Combine
   p_incid <- c(v = p_incid_v, u = p_incid_u)

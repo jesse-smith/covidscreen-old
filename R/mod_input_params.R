@@ -28,7 +28,7 @@ mod_input_params_server <- function(id){
     test_p_asymp <- reactive(1/input$test_freq)
 
     # Context
-    incid <- reactive(input$incid / 1e5)
+    p_incid <- reactive(input$incid / 1e5)
     vac_comm <- reactive(input$vac_comm * 0.01)
 
     # Advanced
@@ -51,8 +51,9 @@ mod_input_params_server <- function(id){
     ))
 
     inf <- reactive(list(
+      p_incid   = p_incid(),
       p_symp    = inf_p_symp(),
-      t_symp     = inf_t_symp(),
+      t_symp    = inf_t_symp(),
       t_presymp = inf_t_presymp()
     ))
 
@@ -67,7 +68,6 @@ mod_input_params_server <- function(id){
     ))
 
     reactive(list(
-      incid  = incid(),
       vac    = vac(),
       inf    = inf(),
       test   = test(),
