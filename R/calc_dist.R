@@ -38,7 +38,7 @@ calc_dist <- function(
   # Infection parameters
   inf = list(p_incid = 0.5, p_symp = 0.5, t_symp = 10, t_presymp = 3),
   # Symptom parameters
-  symp   = list(p_vac_inf = 0.5, p_unvac_inf = 0.5, p_uninf = 0),
+  symp   = list(p_inf_vac = 0.5, p_inf_unvac = 0.5, p_uninf = 0),
   # Test parameters
   test   = list(p_symp = 0.95, p_asymp = 1/7),
   # Detection parameters
@@ -173,11 +173,14 @@ probs_inf <- function(inf, vac) {
   c(p_inf, 1 - p_inf)
 }
 
-probs_symp <- function(inf) {
+probs_symp <- function(symp, inf) {
   # Account for presymptomatic illness
-  p_symp <- inf$p_symp * (1 - inf$t_presymp / (inf$t_presymp + inf$t_symp))
+  p_presymp <- (1 - inf$t_presymp / (inf$t_presymp + inf$t_symp))
+  p_symp_inf <- c(symp$p_inf_vac, symp$p_inf_unvac) * p_presymp
+
+  p_symp <- c(p_symp_inf, symp$p_uninf)
   # Add complement and return
-  c(p_symp, 0, 1 - p_symp, 1)
+  c(p_symp, 1 - p_symp)
 }
 
 probs_test <- function(test) {
