@@ -52,9 +52,14 @@ mod_input_params_server <- function(id){
 
     inf <- reactive(list(
       p_incid   = p_incid(),
-      p_symp    = inf_p_symp(),
       t_symp    = inf_t_symp(),
       t_presymp = inf_t_presymp()
+    ))
+
+    symp <- reactive(list(
+      p_inf_vac   = inf_p_symp(),
+      p_inf_unvac = inf_p_symp(),
+      p_uninf     = 0
     ))
 
     test <- reactive(list(
@@ -70,6 +75,7 @@ mod_input_params_server <- function(id){
     reactive(list(
       vac    = vac(),
       inf    = inf(),
+      symp   = symp(),
       test   = test(),
       detect = detect()
     ))
