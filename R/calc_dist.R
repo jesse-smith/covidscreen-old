@@ -36,7 +36,7 @@ calc_dist <- function(
   # Vaccination parameters
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
   # Infection parameters
-  inf = list(p_incid = 0.5, p_symp = 0.5, t_symp = 10, t_presymp = 3),
+  inf = list(p_incid = 1e-3, t_symp = 10, t_presymp = 3),
   # Symptom parameters
   symp   = list(p_inf_vac = 0.5, p_inf_unvac = 0.5, p_uninf = 0),
   # Test parameters
@@ -57,7 +57,7 @@ calc_dist <- function(
   # Create conditional distributions
   dt_vac    <- dist_vac(vac)
   dt_inf    <- dist_inf(inf, .vac = vac)
-  dt_symp   <- dist_symp(inf)
+  dt_symp   <- dist_symp(symp, .inf = inf)
   dt_test   <- dist_test(test)
   dt_detect <- dist_detect(detect)
 
@@ -115,12 +115,13 @@ dist_inf <- function(.inf, .vac) {
   )
 }
 
-dist_symp <- function(.inf) {
+dist_symp <- function(.symp, .inf) {
   create_dist(
-    # Probs conditional on infection and symptomatic status
-    inf  = c(TRUE, FALSE, TRUE, FALSE),
-    symp = c(TRUE, TRUE, FALSE, FALSE),
-    .p   = probs_symp(.inf)
+    # Probs conditional on vaccination, infection, and symptomatic status
+    vac  = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE),
+    inf  = c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE),
+    symp = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
+    .p   = probs_symp(.symp, .inf)
   )
 }
 
@@ -176,9 +177,12 @@ probs_inf <- function(inf, vac) {
 probs_symp <- function(symp, inf) {
   # Account for presymptomatic illness
   p_presymp <- (1 - inf$t_presymp / (inf$t_presymp + inf$t_symp))
+  # Combine symptoms probs for infections into scaled vector
   p_symp_inf <- c(symp$p_inf_vac, symp$p_inf_unvac) * p_presymp
 
-  p_symp <- c(p_symp_inf, symp$p_uninf)
+  # Combine all symptom probs
+  # (order is {inf_vac, inf_unvac, uninf_vac, uninf_unvac})
+  p_symp <- c(p_symp_inf, symp$p_uninf, symp$p_uninf)
   # Add complement and return
   c(p_symp, 1 - p_symp)
 }
