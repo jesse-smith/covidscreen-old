@@ -25,10 +25,11 @@ mod_input_params_server <- function(id){
 
     # Intervention
     vac_org <- reactive(input$vac_org * 0.01)
-    test_p_asymp <- reactive(1/input$test_freq)
+    test_p_asymp_vac   <- reactive(1/input$test_freq_vac)
+    test_p_asymp_unvac <- reactive(1/input$test_freq_unvac)
 
     # Context
-    p_incid <- reactive(input$incid / 1e5)
+    p_incid  <- reactive(input$incid / 1e5)
     vac_comm <- reactive(input$vac_comm * 0.01)
 
     # Advanced
@@ -64,7 +65,8 @@ mod_input_params_server <- function(id){
 
     test <- reactive(list(
       p_symp  = test_p_symp(),
-      p_asymp = test_p_asymp()
+      p_asymp_vac = test_p_asymp_vac(),
+      p_asymp_unvac = test_p_asymp_unvac()
     ))
 
     detect <- reactive(list(
@@ -95,8 +97,16 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
       ns = ns,
       tags$br(),
       material_number_box(
-        ns("test_freq"),
-        label = "Testing Frequency (Days)",
+        ns("test_freq_vac"),
+        label = "Testing Frequency - Vaccinated (Days)",
+        min_value = 1,
+        max_value = 365,
+        initial_value = 7,
+        step_size = 1
+      ),
+      material_number_box(
+        ns("test_freq_unvac"),
+        label = "Testing Frequency - Unvaccinated (Days)",
         min_value = 1,
         max_value = 365,
         initial_value = 7,
