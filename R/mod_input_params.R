@@ -44,7 +44,6 @@ mod_input_params_server <- function(id){
     detect_spec <- reactive(input$detect_spec * 0.01)
 
     # Group into `calc_dist()` inputs
-
     vac <- reactive(list(
       p_comm = vac_comm(),
       p_org  = vac_org(),
@@ -64,8 +63,8 @@ mod_input_params_server <- function(id){
     ))
 
     test <- reactive(list(
-      p_symp  = test_p_symp(),
-      p_asymp_vac = test_p_asymp_vac(),
+      p_symp        = test_p_symp(),
+      p_asymp_vac   = test_p_asymp_vac(),
       p_asymp_unvac = test_p_asymp_unvac()
     ))
 
@@ -74,6 +73,7 @@ mod_input_params_server <- function(id){
       spec = detect_spec()
     ))
 
+    # Return as `list`
     reactive(list(
       vac    = vac(),
       inf    = inf(),
