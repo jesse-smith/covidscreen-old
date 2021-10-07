@@ -33,16 +33,16 @@ mod_input_params_server <- function(id){
 
     # Advanced
     vac_eff <- reactive(input$vac_eff * 0.01)
-    inf_t_symp   <- reactive(input$inf_t_symp)
+    inf_t_symp    <- reactive(input$inf_t_symp)
     inf_t_presymp <- reactive(input$inf_t_presymp)
-    inf_p_symp <- reactive((100 - input$inf_p_asymp) * 0.01)
+    symp_p_inf_vac   <- reactive((100 - input$asymp_p_inf_vac)   * 0.01)
+    symp_p_inf_unvac <- reactive((100 - input$asymp_p_inf_unvac) * 0.01)
+    symp_p_uninf     <- reactive((100 - input$asymp_p_uninf)     * 0.01)
     test_p_symp <- reactive(input$test_p_symp * 0.01)
     detect_sens <- reactive(input$detect_sens * 0.01)
     detect_spec <- reactive(input$detect_spec * 0.01)
 
     # Group into `calc_dist()` inputs
-
-    # `incid` already done
 
     vac <- reactive(list(
       p_comm = vac_comm(),
@@ -57,9 +57,9 @@ mod_input_params_server <- function(id){
     ))
 
     symp <- reactive(list(
-      p_inf_vac   = inf_p_symp(),
-      p_inf_unvac = inf_p_symp(),
-      p_uninf     = 0
+      p_inf_vac   = symp_p_inf_vac(),
+      p_inf_unvac = symp_p_inf_unvac(),
+      p_uninf     = symp_p_uninf()
     ))
 
     test <- reactive(list(
@@ -183,11 +183,27 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
         step_size = 1
       ),
       material_slider(
-        ns("inf_p_asymp"),
-        label = "% of Infections Asymptomatic",
+        ns("asymp_p_inf_unvac"),
+        label = "% Asymptomatic: Unvaccinated Infections",
         min_value = 0,
         max_value = 100,
         initial_value = 50,
+        step_size = 1
+      ),
+      material_slider(
+        ns("asymp_p_inf_vac"),
+        label = "% Asymptomatic: Vaccinated Infections",
+        min_value = 0,
+        max_value = 100,
+        initial_value = 50,
+        step_size = 1
+      ),
+      material_slider(
+        ns("asymp_p_uninf"),
+        label = "% Asymptomatic: Uninfected",
+        min_value = 0,
+        max_value = 100,
+        initial_value = 100,
         step_size = 1
       ),
       material_slider(
