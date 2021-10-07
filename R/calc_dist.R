@@ -40,7 +40,7 @@ calc_dist <- function(
   # Symptom parameters
   symp   = list(p_inf_vac = 0.5, p_inf_unvac = 0.5, p_uninf = 0),
   # Test parameters
-  test   = list(p_symp = 0.95, p_asymp = 1/7),
+  test   = list(p_symp = 0.95, p_asymp_vac = 1/7, p_asymp_unvac = 1/7),
   # Detection parameters
   detect = list(sens = 0.85, spec = 1)
 ) {
@@ -127,9 +127,10 @@ dist_symp <- function(.symp, .inf) {
 
 dist_test <- function(.test) {
   create_dist(
-    # Probs conditional on symptoms and test status
-    symp = c(TRUE, FALSE, TRUE, FALSE),
-    test = c(TRUE, TRUE, FALSE, FALSE),
+    # Probs conditional on vaccination, symptom, and test status
+    vac  = c(TRUE, FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, FALSE),
+    symp = c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE),
+    test = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE),
     .p   = probs_test(.test)
   )
 }
@@ -179,7 +180,6 @@ probs_symp <- function(symp, inf) {
   p_presymp <- (1 - inf$t_presymp / (inf$t_presymp + inf$t_symp))
   # Combine symptoms probs for infections into scaled vector
   p_symp_inf <- c(symp$p_inf_vac, symp$p_inf_unvac) * p_presymp
-
   # Combine all symptom probs
   # (order is {inf_vac, inf_unvac, uninf_vac, uninf_unvac})
   p_symp <- c(p_symp_inf, symp$p_uninf, symp$p_uninf)
@@ -188,10 +188,13 @@ probs_symp <- function(symp, inf) {
 }
 
 probs_test <- function(test) {
-  # Symptomatic is <= asymptomatic
-  p_symp <- max(test$p_symp, test$p_asymp)
-  # Combine
-  p_test <- c(p_symp, test$p_asymp)
+  # Combine asymptomatic probabilities
+  p_asymp <- c(test$p_asymp_vac, test$p_asymp_unvac)
+  # Symptomatic is <= asymptomatic (and length 2)
+  p_symp <- pmax(test$p_symp, p_asymp)
+  # Combine symptomatic and asymptomatic
+  # (order is {vac_symp, unvac_symp, vac_asymp, unvac_asymp})
+  p_test <- c(p_symp, p_asymp)
   # Add complements and return
   c(p_test, 1 - p_test)
 }
@@ -199,7 +202,6 @@ probs_test <- function(test) {
 probs_detect <- function(detect) {
   # Combine and add probabilities for not tested (0)
   p_d <- c(detect$sens, 1 - detect$spec, 0, 0)
-
   # Add complements and return
   c(p_d, 1 - p_d)
 }
