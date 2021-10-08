@@ -12,13 +12,13 @@ app_ui <- function(request) {
     material_sidebar_page(
       tags$div(style = "padding: 0.9em", tags$br(), mod_input_params_ui("params")),
       material_card(
-        material_tabs(c(About = "about", Table = "table"))
+        material_tabs(c(Home = "about", Scenarios = "scenarios", Explore = "explore"))
       ),
       material_row(tags$div(material_column(
         offset = 1,
         width = 10,
         material_tab_content("about", mod_about_ui("about")),
-        material_tab_content("table", mod_table_ui("table"))
+        material_tab_content("explore", mod_table_ui("table"))
       )))
     )
   )
@@ -39,7 +39,7 @@ golem_add_external_resources <- function(){
   )
 
   tags$head(
-    favicon(ext = "png"),
+    favicon(),
     bundle_resources(
       path = app_sys('app/www'),
       app_title = 'covidscreen'
