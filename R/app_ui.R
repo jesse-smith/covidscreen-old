@@ -56,7 +56,7 @@ material_sidebar_page <- function(
   fluid = TRUE
 ) {
   material_page(
-    title = "COVID Screening",
+    title = "COVID Screening Strategies",
     nav_bar_fixed = FALSE,
     primary_theme_color = "#cc1e27",
     secondary_theme_color = "#e57373",
