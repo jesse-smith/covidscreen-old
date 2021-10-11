@@ -17,6 +17,13 @@ app_ui <- function(request) {
       material_row(
         material_tab_content("home", "intro text"),
         material_tab_content(
+          "scenarios",
+          material_column(
+            mod_input_params_ui("scenarios", interval = TRUE),
+            width = 4
+          )
+        ),
+        material_tab_content(
           "explore",
           material_column(mod_input_params_ui("explore"), width = 4),
           material_column(mod_table_ui("table"), width = 8)

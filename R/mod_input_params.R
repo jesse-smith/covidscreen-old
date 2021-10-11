@@ -7,12 +7,12 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_input_params_ui <- function(id, depth = NULL){
+mod_input_params_ui <- function(id, depth = NULL, interval = FALSE){
   ns <- NS(id)
   tagList(
     mod_input_params_ui_intervention(ns, depth = depth),
     mod_input_params_ui_context(ns, depth = depth),
-    mod_input_params_ui_advanced(ns, depth = depth)
+    mod_input_params_ui_advanced(ns, depth = depth, interval = interval)
   )
 }
 
@@ -112,7 +112,7 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
         initial_value = 7,
         step_size = 1
       ),
-      material_slider(
+      mat_slider(
         ns("vac_org"),
         label = "Vaccinated (% in Organization)",
         min_value = 0,
@@ -136,7 +136,7 @@ mod_input_params_ui_context <- function(ns, depth = NULL) {
       condition = "input.btn_context % 2 == 0",
       ns = ns,
       tags$br(),
-      material_number_box(
+      material_slider(
         ns("incid"),
         label = "Case Rate (per 100k per Day)",
         min_value = 0,
@@ -156,7 +156,7 @@ mod_input_params_ui_context <- function(ns, depth = NULL) {
   )
 }
 
-mod_input_params_ui_advanced <- function(ns, depth = NULL) {
+mod_input_params_ui_advanced <- function(ns, depth = NULL, interval = FALSE) {
   material_card(
     depth = depth,
     material_button(
@@ -167,81 +167,222 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL) {
     conditionalPanel(
       condition = "input.btn_advanced % 2 != 0",
       ns = ns,
-      tags$br(),
-      material_slider(
-        ns("vac_eff"),
-        label = "Vaccine Efficacy (%)",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 70,
-        step_size = 1
+      shinyWidgets::chooseSliderSkin("Flat", color = "#e57373"),
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("vac_eff"),
+          label = "Vaccine Efficacy (%)",
+          min_value = 0,
+          max_value = 100,
+          initial_value = 70,
+          step_size = 1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("vac_eff_range"),
+            label = NULL,
+            min = 0,
+            max = 100,
+            value = c(50, 95),
+            step = 1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       ),
-      material_number_box(
-        ns("inf_t_symp"),
-        label = "Symptomatic Period (Days)",
-        min_value = 1,
-        max_value = 21,
-        initial_value = 10,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_number_box(
+          ns("inf_t_symp"),
+          label = "Symptomatic Period (Days)",
+          min_value = 1,
+          max_value = 21,
+          initial_value = 10,
+          step_size = 1
+        )
       ),
-      material_number_box(
-        ns("inf_t_presymp"),
-        label = "Pre-symptomatic Period (Days)",
-        min_value = 0,
-        max_value = 14,
-        initial_value = 3,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_number_box(
+          ns("inf_t_presymp"),
+          label = "Pre-symptomatic Period (Days)",
+          min_value = 0,
+          max_value = 14,
+          initial_value = 3,
+          step_size = 1
+        )
       ),
-      material_slider(
-        ns("asymp_p_inf_unvac"),
-        label = "% Asymptomatic: Unvaccinated Infections",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 50,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("asymp_p_inf_unvac"),
+          label = "% Asymptomatic: Unvaccinated Infections",
+          min_value = 0,
+          max_value = 100,
+          initial_value = 50,
+          step_size = 1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("asymp_p_inf_unvac_range"),
+            label = NULL,
+            min = 0,
+            max = 100,
+            value = c(30, 70),
+            step = 1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       ),
-      material_slider(
-        ns("asymp_p_inf_vac"),
-        label = "% Asymptomatic: Vaccinated Infections",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 50,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("asymp_p_inf_vac"),
+          label = "% Asymptomatic: Vaccinated Infections",
+          min_value = 0,
+          max_value = 100,
+          initial_value = 70,
+          step = 1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("asymp_p_inf_vac_range"),
+            label = NULL,
+            min = 0,
+            max = 100,
+            value = c(50, 90),
+            step = 1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       ),
-      material_slider(
-        ns("asymp_p_uninf"),
-        label = "% Asymptomatic: Uninfected",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 100,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("asymp_p_uninf"),
+          label = "% Asymptomatic: Uninfected",
+          min_value = 90,
+          max_value = 100,
+          initial_value = 98,
+          step_size = 1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("asymp_p_uninf_range"),
+            label = NULL,
+            min = 90,
+            max = 100,
+            value = c(97, 99),
+            step = 1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       ),
-      material_slider(
-        ns("test_p_symp"),
-        label = "% of Symptomatics Tested",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 95,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("test_p_symp"),
+          label = "% of Symptomatics Tested",
+          min_value = 0,
+          max_value = 100,
+          initial_value = 95,
+          step_size = 1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("test_p_symp_range"),
+            label = NULL,
+            min = 0,
+            max = 100,
+            value = c(90, 100),
+            step = 1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       ),
-      material_slider(
-        ns("detect_sens"),
-        label = "Test Sensitivity (%)",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 85,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("detect_sens"),
+          label = "Test Sensitivity (%)",
+          min_value = 50,
+          max_value = 100,
+          initial_value = 85,
+          step_size = 1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("detect_sens"),
+            label = NULL,
+            min = 50,
+            max = 100,
+            value = c(70, 90),
+            step = 1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       ),
-      material_slider(
-        ns("detect_spec"),
-        label = "Test Specificity (%)",
-        min_value = 0,
-        max_value = 100,
-        initial_value = 100,
-        step_size = 1
+      material_card(
+        depth = depth,
+        material_slider(
+          ns("detect_spec"),
+          label = "Test Specificity (%)",
+          min_value = 90,
+          max_value = 100,
+          initial_value = 99.7,
+          step = 0.1
+        ),
+        if (interval) {
+          sliderInput(
+            ns("detect_spec_range"),
+            label = NULL,
+            min = 90,
+            max = 100,
+            value = c(99, 100),
+            step = 0.1,
+            ticks = FALSE,
+            width = "100%"
+          )
+        }
       )
     )
   )
+}
+
+mat_slider <- function(
+  input_id,
+  label,
+  min_value,
+  max_value,
+  initial_value,
+  step_size = 1
+) {
+  if (NROW(initial_value) != 2) {
+    material_slider(
+      input_id = input_id,
+      label = label,
+      min_value = min_value,
+      max_value = max_value,
+      step_size = step_size,
+      initial_value = initial_value
+    )
+  } else {
+    sliderInput(
+      inputId = input_id,
+      label = label,
+      min = min_value,
+      max = max_value,
+      value = initial_value,
+      step = step_size,
+      ticks = FALSE
+    )
+  }
 }
 
 ## To be copied in the UI
