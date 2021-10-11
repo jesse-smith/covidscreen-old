@@ -7,7 +7,7 @@
 app_server <- function(input, output, session) {
   # Your application server logic
 
-  dist_params <- mod_input_params_server("params")
+  dist_params <- mod_input_params_server("explore")
   dist <- reactive(do.call(calc_dist, dist_params()), label = "calc_dist()")
   mod_table_server(
     "table",

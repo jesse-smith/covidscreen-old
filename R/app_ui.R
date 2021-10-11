@@ -10,16 +10,18 @@ app_ui <- function(request) {
     golem_add_external_resources(),
     # Your application UI logic
     material_sidebar_page(
-      tags$div(style = "padding: 0.9em", tags$br(), mod_input_params_ui("params")),
+      tags$div(style = "padding: 0.9em", tags$br()),
       material_card(
-        material_tabs(c(Home = "about", Scenarios = "scenarios", Explore = "explore"))
+        material_tabs(c(Home = "home", Scenarios = "scenarios", Explore = "explore"))
       ),
-      material_row(tags$div(material_column(
-        offset = 1,
-        width = 10,
-        material_tab_content("about", mod_about_ui("about")),
-        material_tab_content("explore", mod_table_ui("table"))
-      )))
+      material_row(
+        material_tab_content("home", "intro text"),
+        material_tab_content(
+          "explore",
+          material_column(mod_input_params_ui("explore"), width = 4),
+          material_column(mod_table_ui("table"), width = 8)
+        )
+      )
     )
   )
 }
@@ -60,12 +62,6 @@ material_sidebar_page <- function(
     nav_bar_fixed = FALSE,
     primary_theme_color = "#cc1e27",
     secondary_theme_color = "#e57373",
-    ...,
-    material_side_nav(
-      sidebar_panel,
-      fixed = TRUE,
-      image_source = "www/favicon_resized.png",
-      background_color = "grey lighten-4"
-    )
+    ...
   )
 }
