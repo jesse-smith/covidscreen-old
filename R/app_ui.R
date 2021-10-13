@@ -19,9 +19,10 @@ app_ui <- function(request) {
         material_tab_content(
           "scenarios",
           material_column(
-            mod_input_params_ui("scenarios", interval = TRUE),
+            mod_input_params_ui("scenarios", interval = FALSE),
             width = 4
-          )
+          ),
+          material_column(mod_plot_output_ui("scenarios"), width = 8)
         ),
         material_tab_content(
           "explore",

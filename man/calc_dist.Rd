@@ -5,16 +5,14 @@
 \title{Calculate the Steady-State Joint Distribution for a Population}
 \usage{
 calc_dist(
-  incid = 0.1,
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
-  inf = list(p_symp = 0.5, t_symp = 10, t_presymp = 3),
-  test = list(p_symp = 0.95, p_asymp = 1/7),
+  inf = list(p_incid = 0.001, t_symp = 10, t_presymp = 3),
+  symp = list(p_inf_vac = 0.5, p_inf_unvac = 0.5, p_uninf = 0),
+  test = list(p_symp = 0.95, p_asymp_vac = 1/7, p_asymp_unvac = 1/7),
   detect = list(sens = 0.85, spec = 1)
 )
 }
 \arguments{
-\item{incid}{`[numeric(1)]` Incidence rate per 100k per day in the community}
-
 \item{vac}{`[list(3)]` A named list containing vaccination parameters:
 \describe{
   \item{p_comm `[numeric(1)]`}{Proportion vaccinated in the community}
@@ -40,6 +38,11 @@ calc_dist(
   \item{sens `[numeric(1)]`}{Test sensitivity}
   \item{spec `[numeric(1)]`}{Test specificity}
 }}
+
+\item{incid}{`[numeric(1)]` Incidence rate per 100k per day in the community}
+}
+\value{
+A `data.table`
 }
 \description{
 `calc_dist()` calculates the discrete joint distribution of vaccination,

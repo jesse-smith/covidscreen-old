@@ -6,10 +6,15 @@
 \alias{covidscreen-package}
 \title{covidscreen: Simulate Asymptomatic Screening for COVID-19}
 \description{
-The {covidscreen} package provides simple simulations
-    for understanding the effects of assurance testing/screening
-    on a population. It aims to help decision-makers determine whether and how
-    to test for COVID-19 with limited resources.
+The {covidscreen} package provides simple simulations for understanding the effects of assurance testing/screening on a population. It aims to help decision-makers determine whether and how to test for COVID-19 with limited resources.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/jesse-smith/covidscreen}
+  \item Report bugs at \url{https://github.com/jesse-smith/covidscreen/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Jesse Smith \email{Jesse.Smith@stjude.org}

@@ -7,10 +7,21 @@
 app_server <- function(input, output, session) {
   # Your application server logic
 
-  dist_params <- mod_input_params_server("explore")
-  dist <- reactive(do.call(calc_dist, dist_params()), label = "calc_dist()")
+  # Scenario tab
+  params_scenarios <-  mod_input_params_server("scenarios", interval = FALSE)
+  mod_plot_output_server(
+    "scenarios",
+    params = reactive(params_scenarios())
+  )
+
+  # Explore tab
+  params_explore <- mod_input_params_server("explore")
+  dist_explore <- reactive(
+    do.call(calc_dist, params_explore()),
+    label = "calc_dist_explore()"
+  )
   mod_table_server(
     "table",
-    dist = reactive(dist(), label = "dist_arg()")
+    dist = reactive(dist_explore())
   )
 }

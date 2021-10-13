@@ -19,7 +19,7 @@ mod_input_params_ui <- function(id, depth = NULL, interval = FALSE){
 #' input_params Server Functions
 #'
 #' @noRd
-mod_input_params_server <- function(id){
+mod_input_params_server <- function(id, interval = FALSE){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
@@ -42,6 +42,19 @@ mod_input_params_server <- function(id){
     test_p_symp <- reactive(input$test_p_symp * 0.01)
     detect_sens <- reactive(input$detect_sens * 0.01)
     detect_spec <- reactive(input$detect_spec * 0.01)
+
+    # Ranges
+    if (interval) {
+      ranges <- reactive(list(
+        vac_eff = reactive(input$vac_eff_range * 0.01),
+        symp_p_inf_vac   = reactive((100 - input$asymp_p_inf_vac_range)   * 0.01),
+        symp_p_inf_unvac = reactive((100 - input$asymp_p_inf_unvac_range) * 0.01),
+        symp_p_uninf     = reactive((100 - input$asymp_p_uninf_range)     * 0.01),
+        test_p_symp = reactive(input$test_p_symp_range * 0.01),
+        detect_sens = reactive(input$detect_sens_range * 0.01),
+        detect_spec = reactive(input$detect_spec_range * 0.01)
+      ))
+    }
 
     # Group into `calc_dist()` inputs
     vac <- reactive(list(
@@ -74,13 +87,16 @@ mod_input_params_server <- function(id){
     ))
 
     # Return as `list`
-    reactive(list(
-      vac    = vac(),
-      inf    = inf(),
-      symp   = symp(),
-      test   = test(),
-      detect = detect()
-    ))
+    reactive({
+      params <- list(
+        vac    = vac(),
+        inf    = inf(),
+        symp   = symp(),
+        test   = test(),
+        detect = detect()
+      )
+      if (interval) c(params, ranges = ranges()) else params
+    })
   })
 }
 

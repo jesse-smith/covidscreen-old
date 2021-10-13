@@ -18,7 +18,7 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 #'   `%between%` `%chin%` `%flike%` `%ilike%` `%like%` `%inrange%` `:=`
 #'   `.SD` `.BY` `.N` `.I` `.GRP` `.NGRP` `.EACHI`
 #'   data.table merge.data.table set setcolorder setkey setkeyv setindex
-#'   setindexv setorder setorderv nafill setnafill fifelse
+#'   setindexv setorder setorderv nafill setnafill fifelse CJ
 #'
 #'
 #' @importFrom reactable

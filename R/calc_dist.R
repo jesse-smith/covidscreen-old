@@ -32,6 +32,10 @@
 #'     \item{sens `[numeric(1)]`}{Test sensitivity}
 #'     \item{spec `[numeric(1)]`}{Test specificity}
 #'   }
+#'
+#' @return A `data.table`
+#'
+#' @export
 calc_dist <- function(
   # Vaccination parameters
   vac = list(p_comm = 0.5, p_org = 0.5, eff = 0.7),
@@ -73,6 +77,14 @@ calc_dist <- function(
     # Workaround to print on return after modify-by-reference
     .[]
 }
+
+#' Memoized `calc_dist()`
+#'
+#' A version of `calc_dist()` that saves outputs for previous inputs. This
+#' speeds up repetitive processing significantly, at the cost of memory usage.
+#'
+#' @inherit calc_dist params return
+calc_dist_m <- memoise::memoise(calc_dist)
 
 # Join Distributions -----------------------------------------------------------
 
