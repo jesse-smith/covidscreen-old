@@ -12,7 +12,6 @@ app_ui <- function(request) {
     material_sidebar_page(
       tags$div(style = "padding: 0.9em", tags$br()),
       material_card(material_tabs(c(
-        Home = "home",
         Scenarios = "scenarios",
         Distribution = "distribution"
       ))),
