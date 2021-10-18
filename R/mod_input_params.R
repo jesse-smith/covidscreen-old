@@ -36,25 +36,12 @@ mod_input_params_server <- function(id, interval = FALSE){
     vac_eff <- reactive(input$vac_eff * 0.01)
     inf_t_symp    <- reactive(input$inf_t_symp)
     inf_t_presymp <- reactive(input$inf_t_presymp)
-    symp_p_inf_vac   <- reactive((100 - input$asymp_p_inf_vac)   * 0.01)
-    symp_p_inf_unvac <- reactive((100 - input$asymp_p_inf_unvac) * 0.01)
-    symp_p_uninf     <- reactive((100 - input$asymp_p_uninf)     * 0.01)
+    symp_p_inf_vac   <- reactive((input$symp_p_inf_vac)   * 0.01)
+    symp_p_inf_unvac <- reactive((input$symp_p_inf_unvac) * 0.01)
+    symp_p_uninf     <- reactive((input$symp_p_uninf)     * 0.01)
     test_p_symp <- reactive(input$test_p_symp * 0.01)
     detect_sens <- reactive(input$detect_sens * 0.01)
     detect_spec <- reactive(input$detect_spec * 0.01)
-
-    # Ranges
-    if (interval) {
-      ranges <- reactive(list(
-        vac_eff = reactive(input$vac_eff_range * 0.01),
-        symp_p_inf_vac   = reactive((100 - input$asymp_p_inf_vac_range)   * 0.01),
-        symp_p_inf_unvac = reactive((100 - input$asymp_p_inf_unvac_range) * 0.01),
-        symp_p_uninf     = reactive((100 - input$asymp_p_uninf_range)     * 0.01),
-        test_p_symp = reactive(input$test_p_symp_range * 0.01),
-        detect_sens = reactive(input$detect_sens_range * 0.01),
-        detect_spec = reactive(input$detect_spec_range * 0.01)
-      ))
-    }
 
     # Group into `calc_dist()` inputs
     vac <- reactive(list(
@@ -87,16 +74,13 @@ mod_input_params_server <- function(id, interval = FALSE){
     ))
 
     # Return as `list`
-    reactive({
-      params <- list(
+    reactive(list(
         vac    = vac(),
         inf    = inf(),
         symp   = symp(),
         test   = test(),
         detect = detect()
-      )
-      if (interval) c(params, ranges = ranges()) else params
-    })
+    ))
   })
 }
 
@@ -116,7 +100,7 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
         ns("test_freq_vac"),
         label = "Testing Frequency - Vaccinated (Days)",
         min_value = 1,
-        max_value = 365,
+        max_value = 21,
         initial_value = 7,
         step_size = 1
       ),
@@ -124,11 +108,11 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
         ns("test_freq_unvac"),
         label = "Testing Frequency - Unvaccinated (Days)",
         min_value = 1,
-        max_value = 365,
+        max_value = 21,
         initial_value = 7,
         step_size = 1
       ),
-      mat_slider(
+      material_slider(
         ns("vac_org"),
         label = "Vaccinated (% in Organization)",
         min_value = 0,
@@ -152,7 +136,7 @@ mod_input_params_ui_context <- function(ns, depth = NULL) {
       condition = "input.btn_context % 2 == 0",
       ns = ns,
       tags$br(),
-      material_slider(
+      material_number_box(
         ns("incid"),
         label = "Case Rate (per 100k per Day)",
         min_value = 0,
@@ -183,226 +167,78 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL, interval = FALSE) {
     conditionalPanel(
       condition = "input.btn_advanced % 2 != 0",
       ns = ns,
-      shinyWidgets::chooseSliderSkin("Flat", color = "#e57373"),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("vac_eff"),
-          label = "Vaccine Efficacy (%)",
-          min_value = 0,
-          max_value = 100,
-          initial_value = 70,
-          step_size = 1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("vac_eff_range"),
-            label = NULL,
-            min = 0,
-            max = 100,
-            value = c(50, 95),
-            step = 1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("vac_eff"),
+        label = "Vaccine Efficacy (%)",
+        min_value = 0,
+        max_value = 100,
+        initial_value = 70,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_number_box(
-          ns("inf_t_symp"),
-          label = "Symptomatic Period (Days)",
-          min_value = 1,
-          max_value = 21,
-          initial_value = 10,
-          step_size = 1
-        )
+      material_number_box(
+        ns("inf_t_symp"),
+        label = "Symptomatic Period (Days)",
+        min_value = 1,
+        max_value = 21,
+        initial_value = 10,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_number_box(
-          ns("inf_t_presymp"),
-          label = "Pre-symptomatic Period (Days)",
-          min_value = 0,
-          max_value = 14,
-          initial_value = 3,
-          step_size = 1
-        )
+      material_number_box(
+        ns("inf_t_presymp"),
+        label = "Pre-symptomatic Period (Days)",
+        min_value = 0,
+        max_value = 14,
+        initial_value = 3,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("asymp_p_inf_unvac"),
-          label = "% Asymptomatic: Unvaccinated Infections",
-          min_value = 0,
-          max_value = 100,
-          initial_value = 50,
-          step_size = 1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("asymp_p_inf_unvac_range"),
-            label = NULL,
-            min = 0,
-            max = 100,
-            value = c(30, 70),
-            step = 1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("symp_p_inf_unvac"),
+        label = "% Symptomatic: Unvaccinated Infections",
+        min_value = 0,
+        max_value = 100,
+        initial_value = 50,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("asymp_p_inf_vac"),
-          label = "% Asymptomatic: Vaccinated Infections",
-          min_value = 0,
-          max_value = 100,
-          initial_value = 70,
-          step = 1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("asymp_p_inf_vac_range"),
-            label = NULL,
-            min = 0,
-            max = 100,
-            value = c(50, 90),
-            step = 1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("symp_p_inf_vac"),
+        label = "% Symptomatic: Vaccinated Infections",
+        min_value = 0,
+        max_value = 100,
+        initial_value = 30,
+        step = 1
       ),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("asymp_p_uninf"),
-          label = "% Asymptomatic: Uninfected",
-          min_value = 90,
-          max_value = 100,
-          initial_value = 98,
-          step_size = 1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("asymp_p_uninf_range"),
-            label = NULL,
-            min = 90,
-            max = 100,
-            value = c(97, 99),
-            step = 1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("symp_p_uninf"),
+        label = "% Symptomatic: Uninfected",
+        min_value = 0,
+        max_value = 10,
+        initial_value = 2,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("test_p_symp"),
-          label = "% of Symptomatics Tested",
-          min_value = 0,
-          max_value = 100,
-          initial_value = 95,
-          step_size = 1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("test_p_symp_range"),
-            label = NULL,
-            min = 0,
-            max = 100,
-            value = c(90, 100),
-            step = 1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("test_p_symp"),
+        label = "% of Symptomatics Tested",
+        min_value = 0,
+        max_value = 100,
+        initial_value = 95,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("detect_sens"),
-          label = "Test Sensitivity (%)",
-          min_value = 50,
-          max_value = 100,
-          initial_value = 85,
-          step_size = 1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("detect_sens"),
-            label = NULL,
-            min = 50,
-            max = 100,
-            value = c(70, 90),
-            step = 1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("detect_sens"),
+        label = "Test Sensitivity (%)",
+        min_value = 50,
+        max_value = 100,
+        initial_value = 85,
+        step_size = 1
       ),
-      material_card(
-        depth = depth,
-        material_slider(
-          ns("detect_spec"),
-          label = "Test Specificity (%)",
-          min_value = 90,
-          max_value = 100,
-          initial_value = 99.7,
-          step = 0.1
-        ),
-        if (interval) {
-          sliderInput(
-            ns("detect_spec_range"),
-            label = NULL,
-            min = 90,
-            max = 100,
-            value = c(99, 100),
-            step = 0.1,
-            ticks = FALSE,
-            width = "100%"
-          )
-        }
+      material_slider(
+        ns("detect_spec"),
+        label = "Test Specificity (%)",
+        min_value = 90,
+        max_value = 100,
+        initial_value = 99.7,
+        step = 0.1
       )
     )
   )
 }
-
-mat_slider <- function(
-  input_id,
-  label,
-  min_value,
-  max_value,
-  initial_value,
-  step_size = 1
-) {
-  if (NROW(initial_value) != 2) {
-    material_slider(
-      input_id = input_id,
-      label = label,
-      min_value = min_value,
-      max_value = max_value,
-      step_size = step_size,
-      initial_value = initial_value
-    )
-  } else {
-    sliderInput(
-      inputId = input_id,
-      label = label,
-      min = min_value,
-      max = max_value,
-      value = initial_value,
-      step = step_size,
-      ticks = FALSE
-    )
-  }
-}
-
-## To be copied in the UI
-# mod_input_params_ui("input_params_ui_1")
-
-## To be copied in the server
-# mod_input_params_server("input_params_ui_1")

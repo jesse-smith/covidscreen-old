@@ -11,11 +11,12 @@ app_ui <- function(request) {
     # Your application UI logic
     material_sidebar_page(
       tags$div(style = "padding: 0.9em", tags$br()),
-      material_card(
-        material_tabs(c(Home = "home", Scenarios = "scenarios", Explore = "explore"))
-      ),
+      material_card(material_tabs(c(
+        Home = "home",
+        Scenarios = "scenarios",
+        Distribution = "distribution"
+      ))),
       material_row(
-        material_tab_content("home", "intro text"),
         material_tab_content(
           "scenarios",
           material_column(
@@ -25,9 +26,9 @@ app_ui <- function(request) {
           material_column(mod_plot_output_ui("scenarios"), width = 8)
         ),
         material_tab_content(
-          "explore",
-          material_column(mod_input_params_ui("explore"), width = 4),
-          material_column(mod_table_ui("table"), width = 8)
+          "distribution",
+          material_column(mod_input_params_ui("distribution"), width = 4),
+          material_column(mod_table_ui("distribution"), width = 8)
         )
       )
     )

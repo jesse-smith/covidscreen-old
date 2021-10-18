@@ -15,13 +15,13 @@ app_server <- function(input, output, session) {
   )
 
   # Explore tab
-  params_explore <- mod_input_params_server("explore")
+  params_explore <- mod_input_params_server("distribution")
   dist_explore <- reactive(
     do.call(calc_dist, params_explore()),
     label = "calc_dist_explore()"
   )
   mod_table_server(
-    "table",
+    "distribution",
     dist = reactive(dist_explore())
   )
 }

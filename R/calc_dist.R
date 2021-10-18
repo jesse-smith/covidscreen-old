@@ -86,6 +86,19 @@ calc_dist <- function(
 #' @inherit calc_dist params return
 calc_dist_m <- memoise::memoise(calc_dist)
 
+#' Cached `calc_dist()`
+#'
+#' A version of `calc_dist()` that caches outputs based on previous inputs. This
+#' is done using `bindCache()`, which allows the cache to be shared across user
+#' sessions. It returns a reactive expression.
+calc_dist_cache <- function(params) {
+  bindCache(
+    x = reactive(do.call(calc_dist, args = params)),
+    params,
+    cache = "app"
+  )
+}
+
 # Join Distributions -----------------------------------------------------------
 
 join_dist <- function(x, y) {
