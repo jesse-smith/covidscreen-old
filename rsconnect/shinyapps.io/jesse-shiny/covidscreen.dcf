@@ -5,7 +5,10 @@ account: jesse-shiny
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4708592
-bundleId: 5061859
+bundleId: 5150970
 url: https://jesse-shiny.shinyapps.io/covidscreen/
-when: 1632348149.56125
-lastSyncTime: 1632348149.56125
+when: 1634574312.38875
+lastSyncTime: 1634574312.38875
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .github/.gitignore|.github/workflows/pr-commands.yaml|.github/workflows/R-CMD-check.yaml|codecov.yml|dev/01_start.R|dev/02_dev.R|dev/03_deploy.R|dev/run_dev.R|Meta/vignette.rds|vignettes/.gitignore|vignettes/description.Rmd|vignettes/report.Rmd

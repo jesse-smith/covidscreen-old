@@ -29,4 +29,6 @@ if(getRversion() >= "2.15.1")  utils::globalVariables(c("."))
 #'
 #' @importFrom sortable
 #'   rank_list add_rank_list bucket_list render_sortable sortable_output
+#'
+#' @importFrom utils modifyList
 NULL

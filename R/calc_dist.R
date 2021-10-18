@@ -5,8 +5,6 @@
 #' `calc_dist()` calculates the discrete joint distribution of vaccination,
 #' infection, symptoms, tests, and detections in a population.
 #'
-#' @param incid `[numeric(1)]` Incidence rate per 100k per day in the community
-#'
 #' @param vac `[list(3)]` A named list containing vaccination parameters:
 #'   \describe{
 #'     \item{p_comm `[numeric(1)]`}{Proportion vaccinated in the community}
@@ -16,15 +14,23 @@
 #'
 #' @param inf `[list(3)]` A named list containing infection parameters:
 #'   \describe{
-#'     \item{p_symp `[numeric(1)]`}{Proportion of infections eventually showing symptoms}
-#'     \item{t_inf `[numeric(1)]`}{Duration of infectious period}
+#'     \item{p_incid `[numeric(1)]`}{Proportion of community newly infected each day}
+#'     \item{t_symp `[numeric(1)]`}{Duration of symptomatic period}
 #'     \item{t_presymp `[numeric(1)]`}{Duration of presymptomatic period}
 #'   }
 #'
-#' @param test `[list(2)]` A named list containing testing parameters:
+#' @param symp `[list(3)]` A named lust containing symptom parameters:
+#'   \describe{
+#'     \item{p_inf_vac}{Proportion of vaccinated infections who are symptomatic}
+#'     \item{p_inf_unvac}{Proportion of unvaccinated infections who are symptomatic}
+#'     \item{p_uninf}{Proportion of uninfected people who are symptomatic}
+#'   }
+#'
+#' @param test `[list(3)]` A named list containing testing parameters:
 #'   \describe{
 #'     \item{p_symp `[numeric(1)]`}{Probability of being tested if symptomatic}
-#'     \item{p_asymp `[numeric(1)]`}{Probability of being tested if asymptomatic}
+#'     \item{p_asymp_vac `[numeric(1)]`}{Probability of being tested if asymptomatic and vaccinated}
+#'     \item{p_asymp_unvac `[numeric(1)]`}{Probability of being tested if asymptomatic and unvaccinated}
 #'   }
 #'
 #' @param detect `[list(2)]` A named list containing detection parameters:
@@ -49,15 +55,6 @@ calc_dist <- function(
   detect = list(sens = 0.85, spec = 1)
 ) {
 
-  # Check arguments
-  # assert_args(
-  #   incid = incid,
-  #   vac = vac,
-  #   inf = inf,
-  #   test = test,
-  #   detect = detect
-  # )
-
   # Create conditional distributions
   dt_vac    <- dist_vac(vac)
   dt_inf    <- dist_inf(inf, .vac = vac)
@@ -78,19 +75,19 @@ calc_dist <- function(
     .[]
 }
 
-#' Memoized `calc_dist()`
-#'
-#' A version of `calc_dist()` that saves outputs for previous inputs. This
-#' speeds up repetitive processing significantly, at the cost of memory usage.
-#'
-#' @inherit calc_dist params return
-calc_dist_m <- memoise::memoise(calc_dist)
-
 #' Cached `calc_dist()`
 #'
 #' A version of `calc_dist()` that caches outputs based on previous inputs. This
 #' is done using `bindCache()`, which allows the cache to be shared across user
 #' sessions. It returns a reactive expression.
+#'
+#' @param params A named `list` of arguments to `calc_dist()`
+#'
+#' @return A `reactive` expression
+#'
+#' @keywords internal
+#'
+#' @export
 calc_dist_cache <- function(params) {
   bindCache(
     x = reactive(do.call(calc_dist, args = params)),

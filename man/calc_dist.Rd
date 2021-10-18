@@ -22,15 +22,23 @@ calc_dist(
 
 \item{inf}{`[list(3)]` A named list containing infection parameters:
 \describe{
-  \item{p_symp `[numeric(1)]`}{Proportion of infections eventually showing symptoms}
-  \item{t_inf `[numeric(1)]`}{Duration of infectious period}
+  \item{p_incid `[numeric(1)]`}{Proportion of community newly infected each day}
+  \item{t_symp `[numeric(1)]`}{Duration of symptomatic period}
   \item{t_presymp `[numeric(1)]`}{Duration of presymptomatic period}
 }}
 
-\item{test}{`[list(2)]` A named list containing testing parameters:
+\item{symp}{`[list(3)]` A named lust containing symptom parameters:
+\describe{
+  \item{p_inf_vac}{Proportion of vaccinated infections who are symptomatic}
+  \item{p_inf_unvac}{Proportion of unvaccinated infections who are symptomatic}
+  \item{p_uninf}{Proportion of uninfected people who are symptomatic}
+}}
+
+\item{test}{`[list(3)]` A named list containing testing parameters:
 \describe{
   \item{p_symp `[numeric(1)]`}{Probability of being tested if symptomatic}
-  \item{p_asymp `[numeric(1)]`}{Probability of being tested if asymptomatic}
+  \item{p_asymp_vac `[numeric(1)]`}{Probability of being tested if asymptomatic and vaccinated}
+  \item{p_asymp_unvac `[numeric(1)]`}{Probability of being tested if asymptomatic and unvaccinated}
 }}
 
 \item{detect}{`[list(2)]` A named list containing detection parameters:
@@ -38,8 +46,6 @@ calc_dist(
   \item{sens `[numeric(1)]`}{Test sensitivity}
   \item{spec `[numeric(1)]`}{Test specificity}
 }}
-
-\item{incid}{`[numeric(1)]` Incidence rate per 100k per day in the community}
 }
 \value{
 A `data.table`

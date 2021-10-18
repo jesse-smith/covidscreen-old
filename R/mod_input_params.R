@@ -205,7 +205,7 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL, interval = FALSE) {
         min_value = 0,
         max_value = 100,
         initial_value = 30,
-        step = 1
+        step_size = 1
       ),
       material_slider(
         ns("symp_p_uninf"),
@@ -237,7 +237,7 @@ mod_input_params_ui_advanced <- function(ns, depth = NULL, interval = FALSE) {
         min_value = 90,
         max_value = 100,
         initial_value = 99.7,
-        step = 0.1
+        step_size = 0.1
       )
     )
   )
