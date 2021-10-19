@@ -17,6 +17,10 @@ mod_table_ui <- function(id){
 
 #' table Server Functions
 #'
+#' @param id `[character(1)]` A unique identifier for the module instance
+#'
+#' @param dist `[data.table]` A distribution from `calc_dist()`
+#'
 #' @noRd
 mod_table_server <- function(id, dist){
   moduleServer(id, function(input, output, session){
@@ -135,14 +139,42 @@ mod_table_ui_sort <- function(ns, depth = NULL) {
   material_card(title = "Columns", depth = depth, col_bucket)
 }
 
+#' Convert `logical` Values to `"Yes"`/`"No"`/`"-"` in `data.table` Distribution
+#'
+#' @param data `[data.table]` Distribution from `calc_dist()`
+#'
+#' @param cols `[character]` Columns to convert
+#'
+#' @return The modified `data.table`
+#'
+#' @noRd
 dist_yn <- function(data, cols) {
   data[, c(cols) := lapply(.SD, lgl_to_str), .SDcols = cols][]
 }
 
+#' Convert `logical` Vector to `character`
+#'
+#' @param x `[logical]` Vector to convert
+#'
+#' @param true,false,na `[character(1)]` The value to assign to
+#'   `TRUE`/`FALSE`/`NA`
+#'
+#' @return `[character]` The converted vector
 lgl_to_str <- function(x, true = "Yes", false = "No", na = "-") {
   fifelse(x, yes = true, no = false, na = na)
 }
 
+#' Create a `reactable` Table from a Distribution
+#'
+#' @param dist `[data.table]` A distribution from `calc_dist()`
+#'
+#' @param select `[character]` Columns for unconditional probabilities and
+#'   grouping
+#'
+#' @param grouped `[character]` Columns for conditional probabilities within
+#'   groups defined by `select`
+#'
+#' @return `[reactable]` A table containing a distribution view
 create_table <- function(dist, select, grouped) {
 
   # Define all possible table columns
@@ -159,12 +191,17 @@ create_table <- function(dist, select, grouped) {
     )
   )
 
+  # Create distribution from `select`
   dist_grp <- dist_data(dist, cols = select)
 
+  # Get variable columns
   data_grp <- dist_grp[, -"p"]
 
+  # Create conditional probability table
   detail_fn <- function(i) {
+    # Get nested (conditional) probabilities for a given row
     dist_nest <- dist[data_grp[i], on = select]
+    # Return a `reactable` with the `grouped` distribution within this row
     tags$div(
       style = "padding: 16px",
       reactable(
@@ -177,6 +214,7 @@ create_table <- function(dist, select, grouped) {
     )
   }
 
+  # Return a `reactable`
   reactable(
     dist_grp,
     details = detail_fn,
@@ -229,9 +267,3 @@ react_col_def <- function(name = NULL, aggregate = NULL, format = NULL) {
     na = "-"
   )
 }
-
-## To be copied in the UI
-# mod_table_ui("table_ui_1")
-
-## To be copied in the server
-# mod_table_server("table_ui_1")
