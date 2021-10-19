@@ -100,7 +100,7 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
         ns("test_freq_vac"),
         label = "Testing Frequency - Vaccinated (Days)",
         min_value = 1,
-        max_value = 21,
+        max_value = 30,
         initial_value = 7,
         step_size = 1
       ),
@@ -108,7 +108,7 @@ mod_input_params_ui_intervention <- function(ns, depth = NULL) {
         ns("test_freq_unvac"),
         label = "Testing Frequency - Unvaccinated (Days)",
         min_value = 1,
-        max_value = 21,
+        max_value = 30,
         initial_value = 7,
         step_size = 1
       ),
