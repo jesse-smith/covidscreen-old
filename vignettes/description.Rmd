@@ -1,6 +1,6 @@
 ---
 title: "Model Description"
-output: rmarkdown::html_vignette
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{Model Description}
   %\VignetteEngine{knitr::rmarkdown}
