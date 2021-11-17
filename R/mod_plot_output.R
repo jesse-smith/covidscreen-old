@@ -107,8 +107,8 @@ slope_card <- function(ns) {
       "The number of tests needed to detect a certain number of cases changes ",
       "with the scenario. We can see how many additional cases we detect per ",
       "test performed. This increases for <b>both</b> groups as more people ",
-      "are vaccinated in the organization, although the relative benefits stay ",
-      "the same. Here, higher is better."
+      "are vaccinated in the community; relative benefits also increase. ",
+      "Here, higher is better."
     )),
     tags$br(),
     plotly::plotlyOutput(ns("plt_slopes"))
@@ -190,10 +190,10 @@ plot_slopes <- function(data) {
     y = slopes,
     color = nms,
     type = "bar",
-    hovertemplate = "%{y:.2f}%"
+    hovertemplate = "%{y:.2r} Cases per Test"
   ) %>%
     plotly::layout(
-      yaxis = list(title = "% Active Cases Detected per Test"),
+      yaxis = list(title = "Active Cases Detected per Test"),
       annotations = list(
        x = 0.4,
        xanchor = "left",
@@ -338,8 +338,8 @@ plot_3d <- function(data, z) {
 
 calc_slopes <- function(data) {
 
-  # Interested in pct_detected / tests
-  vars <- c("tests", "pct_detected")
+  # Interested in detected / tests
+  vars <- c("tests", "detected")
   # Get a testing level - doesn't matter which one, so first one
   t <- data$t_v[[1L]]
 
@@ -358,13 +358,13 @@ calc_slopes <- function(data) {
 calc_slope <- function(data, vars) {
   diffs <- data[NROW(data), ..vars] - data[1L, ..vars]
 
-  diffs$pct_detected / diffs$tests
+  diffs$detected / diffs$tests
 }
 
 calc_intercepts <- function(data) {
   n <- NROW(data)
   test_min   <- data$tests[[n]]
-  detect_min <- data$pct_detected[[n]]
+  detect_min <- data$detected[[n]]
 
   detect_min - test_min * calc_slopes(data)
 }

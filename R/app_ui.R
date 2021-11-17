@@ -13,6 +13,7 @@ app_ui <- function(request) {
       tags$div(style = "padding: 0.9em", tags$br()),
       material_card(material_tabs(c(
         Scenarios = "scenarios",
+        Introduction = "intro",
         Distribution = "distribution"
       ))),
       material_row(
@@ -23,6 +24,10 @@ app_ui <- function(request) {
             width = 4
           ),
           material_column(mod_plot_output_ui("scenarios"), width = 8)
+        ),
+        material_tab_content(
+          "intro",
+          mod_intro_ui("intro")
         ),
         material_tab_content(
           "distribution",
